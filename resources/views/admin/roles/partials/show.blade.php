@@ -3,12 +3,9 @@
         <i class="fas fa-shield-alt"></i>
     </div>
     <h4 class="font-weight-bold text-dark mb-1">{{ $role->name }}</h4>
-    <span class="badge badge-secondary px-3 py-1 font-weight-bold text-uppercase shadow-sm">
-        Guard: {{ $role->guard_name }}
-    </span>
+    <span class="badge badge-secondary px-3 py-1 font-weight-bold text-uppercase shadow-sm">Guard: {{ $role->guard_name }}</span>
 </div>
 
-<!-- Assigned Permissions Grouped -->
 <div class="card bg-light border-0 p-3 shadow-sm mb-3">
     <h6 class="font-weight-bold text-dark mb-3 border-bottom pb-2">
         <i class="fas fa-key mr-2 text-primary"></i> Assigned Permissions ({{ $role->permissions->count() }})
@@ -30,7 +27,6 @@
     </div>
 </div>
 
-<!-- Modal Actions -->
 <div class="text-right border-top pt-3 mt-3 bg-white rounded-bottom">
     <button type="button" class="btn btn-secondary font-weight-bold px-5 shadow-sm" data-dismiss="modal">Close</button>
 </div>

@@ -17,6 +17,21 @@ class Permission extends SpatiePermission
         'group_name',
     ];
 
+    public function scopeSearch(Builder $query, ?string $search): Builder
+    {
+        $search = trim((string) $search);
+
+        if ($search === '') {
+            return $query;
+        }
+
+        return $query->where(function (Builder $subQuery) use ($search) {
+            $subQuery->where('name', 'like', "%{$search}%")
+                ->orWhere('guard_name', 'like', "%{$search}%")
+                ->orWhere('group_name', 'like', "%{$search}%");
+        });
+    }
+
     public function scopeByGuard(Builder $query, string $guardName): Builder
     {
         return $query->where('guard_name', $guardName);

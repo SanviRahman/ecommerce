@@ -1,6 +1,5 @@
 <script>
     $(document).ready(function () {
-        // Setup AJAX CSRF Token
         $.ajaxSetup({
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
         });
@@ -8,9 +7,9 @@
         const $page = $('#page-manager');
         const $wrapper = $('#content-wrapper');
 
-        // Load Data via AJAX
         function loadData(url = $page.data('index-url')) {
             $wrapper.addClass('loading');
+
             let params = {
                 search: $('#table_search').val(),
                 role: $('#filter_role').length ? $('#filter_role').val() : ''
@@ -25,9 +24,8 @@
             });
         }
 
-        // Search & Filter Events
         $('#btnSearch, #filter_role').on('click change', function() { loadData(); });
-        $('#table_search').on('keypress', function(e) { if(e.which === 13) loadData(); });
+        $('#table_search').on('keypress', function(e) { if (e.which === 13) loadData(); });
 
         $('#btnClearSearch').on('click', function() {
             $('#table_search').val('');
@@ -40,13 +38,11 @@
             loadData();
         });
 
-        // Pagination Click
         $(document).on('click', '.pagination a', function(e) {
             e.preventDefault();
             loadData($(this).attr('href'));
         });
 
-        // Open Modal for Create, Edit, Show
         function openModal(url, title) {
             $('#modal-title').text(title);
             $('#modal-body').html('<div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-3x text-primary mb-3"></i><p class="font-weight-bold text-muted">Loading...</p></div>');
@@ -63,15 +59,15 @@
         $(document).on('click', '.btn-edit', function() { openModal($(this).data('url'), 'Edit Admin'); });
         $(document).on('click', '.btn-show', function() { openModal($(this).data('url'), 'Admin Details'); });
 
-        // AJAX Form Submit (Store & Update)
         $(document).on('submit', '#ajax-form', function(e) {
             e.preventDefault();
+
             let $form = $(this);
             let $btn = $form.find('button[type="submit"]');
             let formData = new FormData(this);
 
             $btn.prop('disabled', true).append(' <i class="fas fa-spinner fa-spin ml-1"></i>');
-            $('.invalid-feedback').text('');
+            $('.invalid-feedback, .text-danger[class*="error-"]').text('');
             $('.form-control').removeClass('is-invalid');
 
             $.ajax({
@@ -87,13 +83,15 @@
                 },
                 error: function(xhr) {
                     $btn.prop('disabled', false).find('.fa-spinner').remove();
-                    if(xhr.status === 422) {
+
+                    if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
                         $.each(xhr.responseJSON.errors, function(field, err) {
-                            let fieldName = field.replace('.', '_');
-                            $(`[name="${field}"]`).addClass('is-invalid');
-                            $(`.error-${fieldName}`).text(err[0]).show();
+                            let baseField = field.split('.')[0];
+                            let errorClass = field.replace(/\./g, '_');
+                            $(`[name="${baseField}"], [name="${baseField}[]"]`).addClass('is-invalid');
+                            $(`.error-${errorClass}, .error-${baseField}`).first().text(err[0]).show();
                         });
-                    } else if(xhr.responseJSON && xhr.responseJSON.message) {
+                    } else if (xhr.responseJSON && xhr.responseJSON.message) {
                         Swal.fire('Error', xhr.responseJSON.message, 'error');
                     } else {
                         Swal.fire('Error', 'An unexpected error occurred.', 'error');
@@ -102,7 +100,6 @@
             });
         });
 
-        // Delete, Restore, Force Delete Single Item
         $(document).on('click', '.btn-delete, .btn-restore, .btn-force-delete', function() {
             let url = $(this).data('url');
             let isForce = $(this).hasClass('btn-force-delete');
@@ -133,17 +130,15 @@
             });
         });
 
-        // Bulk Selection Check All
         $(document).on('click', '#checkAll', function() {
             $('.row-checkbox').prop('checked', this.checked);
         });
 
-        // Apply Bulk Action
         $('#btnApplyBulk').on('click', function() {
             let action = $('#bulk_action').val();
             let ids = $('.row-checkbox:checked').map(function() { return $(this).val(); }).get();
 
-            if (!action) return Swal.fire('Notice', 'Please select a bulk action.', 'info');
+            if (! action) return Swal.fire('Notice', 'Please select a bulk action.', 'info');
             if (ids.length === 0) return Swal.fire('Notice', 'Please select at least one row.', 'info');
 
             Swal.fire({
@@ -156,7 +151,7 @@
             }).then((result) => {
                 if (result.value) {
                     $.post($page.data('bulk-url'), { action: action, ids: ids }, function(res) {
-                        if(res.success) {
+                        if (res.success) {
                             Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.message, showConfirmButton: false, timer: 3000 });
                             $('#bulk_action').val('');
                             loadData();

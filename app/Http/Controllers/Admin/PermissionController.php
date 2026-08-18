@@ -5,32 +5,26 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Permission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use Spatie\Permission\PermissionRegistrar;
 
 class PermissionController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Permission::query();
-
-        if ($request->filled('search')) {
-            $search = trim((string) $request->search);
-
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('group_name', 'like', "%{$search}%");
-            });
-        }
-
-        if ($request->filled('guard_name')) {
-            $query->byGuard((string) $request->guard_name);
-        }
-
-        if ($request->filled('group_name')) {
-            $query->byGroup((string) $request->group_name);
-        }
-
-        $permissions = $query->latest('id')
+        $permissions = Permission::query()
+            ->search($request->input('search'))
+            ->when(
+                $request->filled('guard_name'),
+                fn ($query) => $query->byGuard((string) $request->input('guard_name'))
+            )
+            ->when(
+                $request->filled('group_name'),
+                fn ($query) => $query->byGroup((string) $request->input('group_name'))
+            )
+            ->latest('id')
             ->paginate(15)
             ->withQueryString();
 
@@ -73,32 +67,25 @@ class PermissionController extends Controller
 
     public function list(Request $request)
     {
-        $query = Permission::query();
-
-        if ($request->filled('search')) {
-            $query->where(
+        $permissions = Permission::query()
+            ->search($request->input('search'))
+            ->when(
+                $request->filled('guard_name'),
+                fn ($query) => $query->byGuard((string) $request->input('guard_name'))
+            )
+            ->orderBy('group_name')
+            ->orderBy('name')
+            ->limit(100)
+            ->get([
+                'id',
                 'name',
-                'like',
-                '%' . trim((string) $request->search) . '%'
-            );
-        }
-
-        if ($request->filled('guard_name')) {
-            $query->byGuard((string) $request->guard_name);
-        }
+                'guard_name',
+                'group_name',
+            ]);
 
         return response()->json([
             'success' => true,
-            'data' => $query
-                ->orderBy('group_name')
-                ->orderBy('name')
-                ->limit(100)
-                ->get([
-                    'id',
-                    'name',
-                    'guard_name',
-                    'group_name',
-                ]),
+            'data' => $permissions,
         ]);
     }
 
@@ -122,15 +109,20 @@ class PermissionController extends Controller
     {
         $validated = $this->validatePermission($request);
 
-        Permission::create([
+        $permission = Permission::create([
             'name' => $validated['name'],
             'guard_name' => $validated['guard_name'],
-            'group_name' => $validated['group_name'] ?: 'General',
+            'group_name' => $validated['group_name'],
         ]);
+
+        $this->forgetPermissionCache();
 
         return response()->json([
             'success' => true,
             'message' => 'Permission created successfully.',
+            'data' => [
+                'id' => $permission->id,
+            ],
         ]);
     }
 
@@ -162,20 +154,19 @@ class PermissionController extends Controller
         ]);
     }
 
-    public function update(
-        Request $request,
-        Permission $permission
-    ) {
-        $validated = $this->validatePermission(
-            $request,
-            $permission
-        );
+    public function update(Request $request, Permission $permission)
+    {
+        $validated = $this->validatePermission($request, $permission);
+
+        $this->guardAgainstAssignedGuardChange($permission, $validated['guard_name']);
 
         $permission->update([
             'name' => $validated['name'],
             'guard_name' => $validated['guard_name'],
-            'group_name' => $validated['group_name'] ?: 'General',
+            'group_name' => $validated['group_name'],
         ]);
+
+        $this->forgetPermissionCache();
 
         return response()->json([
             'success' => true,
@@ -186,6 +177,8 @@ class PermissionController extends Controller
     public function destroy(Permission $permission)
     {
         $permission->delete();
+
+        $this->forgetPermissionCache();
 
         return response()->json([
             'success' => true,
@@ -204,31 +197,31 @@ class PermissionController extends Controller
                     'force_delete',
                 ]),
             ],
-
-            'ids' => [
-                'required',
-                'array',
-                'min:1',
-            ],
-
-            'ids.*' => [
-                'required',
-                'integer',
-                'distinct',
-            ],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['required', 'integer', 'distinct'],
         ]);
 
-        $ids = array_values(
-            array_unique(
-                array_map('intval', $validated['ids'])
-            )
-        );
+        $ids = collect($validated['ids'])
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn ($id) => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($ids)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No valid permissions selected.',
+            ], 422);
+        }
 
         $message = match ($validated['action']) {
             'delete' => $this->bulkDelete($ids),
             'restore' => $this->bulkRestore($ids),
             'force_delete' => $this->bulkForceDelete($ids),
         };
+
+        $this->forgetPermissionCache();
 
         return response()->json([
             'success' => true,
@@ -238,19 +231,11 @@ class PermissionController extends Controller
 
     public function trash(Request $request)
     {
-        $query = Permission::onlyTrashed()
-            ->latest('deleted_at');
-
-        if ($request->filled('search')) {
-            $search = trim((string) $request->search);
-
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('group_name', 'like', "%{$search}%");
-            });
-        }
-
-        $permissions = $query->paginate(15)->withQueryString();
+        $permissions = Permission::onlyTrashed()
+            ->search($request->input('search'))
+            ->latest('deleted_at')
+            ->paginate(15)
+            ->withQueryString();
 
         if ($request->ajax()) {
             return response()->json([
@@ -277,9 +262,11 @@ class PermissionController extends Controller
 
     public function restore(int $permission)
     {
-        Permission::onlyTrashed()
-            ->findOrFail($permission)
-            ->restore();
+        $model = Permission::onlyTrashed()->findOrFail($permission);
+
+        $model->restore();
+
+        $this->forgetPermissionCache();
 
         return response()->json([
             'success' => true,
@@ -289,9 +276,11 @@ class PermissionController extends Controller
 
     public function forceDelete(int $permission)
     {
-        Permission::onlyTrashed()
-            ->findOrFail($permission)
-            ->forceDelete();
+        $model = Permission::onlyTrashed()->findOrFail($permission);
+
+        $model->forceDelete();
+
+        $this->forgetPermissionCache();
 
         return response()->json([
             'success' => true,
@@ -303,64 +292,110 @@ class PermissionController extends Controller
         Request $request,
         ?Permission $permission = null
     ): array {
-        $guardName = (string) $request->input(
-            'guard_name',
-            'admin'
-        );
+        $request->merge([
+            'name' => trim((string) $request->input('name')),
+            'guard_name' => trim((string) $request->input('guard_name', 'admin')),
+            'group_name' => trim((string) $request->input('group_name', '')),
+        ]);
 
-        return $request->validate([
+        $guardName = (string) $request->input('guard_name');
+
+        $validated = $request->validate([
             'name' => [
                 'required',
                 'string',
                 'max:255',
-
                 Rule::unique('permissions', 'name')
-                    ->where(
-                        fn ($query) =>
-                            $query->where(
-                                'guard_name',
-                                $guardName
-                            )
-                    )
+                    ->where(fn ($query) => $query->where('guard_name', $guardName))
                     ->ignore($permission?->id),
             ],
-
             'guard_name' => [
                 'required',
                 'string',
                 'max:255',
             ],
-
             'group_name' => [
                 'nullable',
                 'string',
                 'max:255',
             ],
         ]);
+
+        $validated['group_name'] = $validated['group_name'] !== ''
+            ? $validated['group_name']
+            : 'General';
+
+        return $validated;
+    }
+
+    private function guardAgainstAssignedGuardChange(
+        Permission $permission,
+        string $newGuardName
+    ): void {
+        if ($permission->guard_name === $newGuardName) {
+            return;
+        }
+
+        $hasRoleAssignments = DB::table(
+            config('permission.table_names.role_has_permissions', 'role_has_permissions')
+        )
+            ->where(
+                config('permission.column_names.permission_pivot_key') ?: 'permission_id',
+                $permission->id
+            )
+            ->exists();
+
+        $hasDirectAssignments = DB::table(
+            config('permission.table_names.model_has_permissions', 'model_has_permissions')
+        )
+            ->where(
+                config('permission.column_names.permission_pivot_key') ?: 'permission_id',
+                $permission->id
+            )
+            ->exists();
+
+        if ($hasRoleAssignments || $hasDirectAssignments) {
+            throw ValidationException::withMessages([
+                'guard_name' => 'Guard name cannot be changed while this permission is assigned to a role or user.',
+            ]);
+        }
     }
 
     private function bulkDelete(array $ids): string
     {
-        Permission::whereIn('id', $ids)->delete();
+        $count = Permission::query()
+            ->whereIn('id', $ids)
+            ->delete();
 
-        return 'Selected permissions moved to trash.';
+        return $count > 0
+            ? "{$count} permission(s) moved to trash."
+            : 'No active permissions were changed.';
     }
 
     private function bulkRestore(array $ids): string
     {
-        Permission::onlyTrashed()
+        $count = Permission::onlyTrashed()
             ->whereIn('id', $ids)
             ->restore();
 
-        return 'Selected permissions restored.';
+        return $count > 0
+            ? "{$count} permission(s) restored."
+            : 'No trashed permissions were changed.';
     }
 
     private function bulkForceDelete(array $ids): string
     {
-        Permission::onlyTrashed()
+        $count = Permission::onlyTrashed()
             ->whereIn('id', $ids)
             ->forceDelete();
 
-        return 'Selected permissions permanently deleted.';
+        return $count > 0
+            ? "{$count} permission(s) permanently deleted."
+            : 'No trashed permissions were changed.';
+    }
+
+    private function forgetPermissionCache(): void
+    {
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 }

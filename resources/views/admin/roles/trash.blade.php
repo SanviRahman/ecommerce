@@ -6,7 +6,6 @@
          data-index-url="{{ route('admin.roles.trashed') }}"
          data-bulk-url="{{ route('admin.roles.multiple_action') }}">
 
-        <!-- Top Action Bar -->
         <div class="d-flex align-items-center flex-wrap mb-3" style="gap: 6px;">
             @can('role_list')
                 <a href="{{ route('admin.roles.index') }}" class="btn btn-secondary btn-sm font-weight-bold shadow-sm">
@@ -24,12 +23,9 @@
                 @endcan
             </select>
 
-            <button type="button" class="btn btn-secondary btn-sm font-weight-bold px-3 shadow-sm" id="btnApplyBulk">
-                APPLY
-            </button>
+            <button type="button" class="btn btn-secondary btn-sm font-weight-bold px-3 shadow-sm" id="btnApplyBulk">APPLY</button>
         </div>
 
-        <!-- Search Section -->
         <div class="card shadow-sm border-0 mb-3">
             <div class="card-body px-3 py-2">
                 <div class="row align-items-end">
@@ -53,7 +49,6 @@
             </div>
         </div>
 
-        <!-- Main Table Section -->
         @can('role_trash')
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white px-3 py-3 border-bottom text-danger">
@@ -63,10 +58,7 @@
                 </div>
 
                 <div class="card-body p-0" id="content-wrapper" style="min-height: 340px;">
-                    @include('admin.roles.partials.table', [
-                        'roles' => $roles,
-                        'isTrash' => true,
-                    ])
+                    @include('admin.roles.partials.table', ['roles' => $roles, 'isTrash' => true])
                 </div>
             </div>
         @else

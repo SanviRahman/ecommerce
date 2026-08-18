@@ -8,15 +8,13 @@ use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\PermissionRegistrar;
 
 class RoleController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Role::query()->withCount([
-            'permissions',
-            'users',
-        ]);
+        $query = Role::query()->withCount(['permissions', 'users']);
 
         if ($request->filled('search')) {
             $search = trim((string) $request->search);
@@ -31,9 +29,7 @@ class RoleController extends Controller
             $query->where('guard_name', $request->guard_name);
         }
 
-        $roles = $query->latest('id')
-            ->paginate(15)
-            ->withQueryString();
+        $roles = $query->latest('id')->paginate(15)->withQueryString();
 
         $guards = Role::query()
             ->select('guard_name')
@@ -43,22 +39,19 @@ class RoleController extends Controller
 
         if ($request->ajax()) {
             return response()->json([
-                'html' => view('admin.roles.partials.table', compact('roles'))->render(),
+                'html' => view('admin.roles.partials.table', [
+                    'roles' => $roles,
+                    'isTrash' => false,
+                ])->render(),
             ]);
         }
 
         $title = 'Roles & Permissions Management';
-
         $breadcrumb = [
             ['text' => 'Roles List', 'url' => route('admin.roles.index')],
         ];
 
-        return view('admin.roles.index', compact(
-            'roles',
-            'guards',
-            'title',
-            'breadcrumb'
-        ));
+        return view('admin.roles.index', compact('roles', 'guards', 'title', 'breadcrumb'));
     }
 
     public function list(Request $request)
@@ -66,11 +59,7 @@ class RoleController extends Controller
         $query = Role::query();
 
         if ($request->filled('search')) {
-            $query->where(
-                'name',
-                'like',
-                '%' . trim((string) $request->search) . '%'
-            );
+            $query->where('name', 'like', '%' . trim((string) $request->search) . '%');
         }
 
         if ($request->filled('guard_name')) {
@@ -79,10 +68,7 @@ class RoleController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $query
-                ->orderBy('name')
-                ->limit(100)
-                ->get(['id', 'name', 'guard_name']),
+            'data' => $query->orderBy('name')->limit(100)->get(['id', 'name', 'guard_name']),
         ]);
     }
 
@@ -92,32 +78,31 @@ class RoleController extends Controller
         $search = trim((string) $request->input('search', ''));
         $roleId = $request->integer('role_id');
 
-        $selectedPermissions = [];
+        if ($request->has('selected_permissions')) {
+            $selectedPermissions = collect((array) $request->input('selected_permissions', []))
+                ->filter(fn ($name) => is_string($name) && $name !== '')
+                ->unique()
+                ->values()
+                ->all();
+        } else {
+            $selectedPermissions = [];
 
-        if ($roleId) {
-            $role = Role::find($roleId);
+            if ($roleId) {
+                $role = Role::find($roleId);
 
-            if ($role) {
-                $selectedPermissions = $role->permissions
-                    ->pluck('name')
-                    ->all();
+                if ($role) {
+                    $selectedPermissions = $role->permissions->pluck('name')->all();
+                }
             }
         }
 
         $permissions = Permission::query()
             ->where('guard_name', $guardName)
-            ->when(
-                $search !== '',
-                fn ($query) => $query
-                    ->where('name', 'like', "%{$search}%")
-            )
+            ->when($search !== '', fn ($query) => $query->where('name', 'like', "%{$search}%"))
             ->orderBy('group_name')
             ->orderBy('name')
             ->get()
-            ->groupBy(
-                fn (Permission $permission) =>
-                    $permission->group_name ?: 'General'
-            );
+            ->groupBy(fn (Permission $permission) => $permission->group_name ?: 'General');
 
         return response()->json([
             'success' => true,
@@ -148,17 +133,10 @@ class RoleController extends Controller
             ->orderBy('group_name')
             ->orderBy('name')
             ->get()
-            ->groupBy(
-                fn (Permission $permission) =>
-                    $permission->group_name ?: 'General'
-            );
+            ->groupBy(fn (Permission $permission) => $permission->group_name ?: 'General');
 
         return response()->json([
-            'html' => view('admin.roles.partials.form', compact(
-                'guards',
-                'permissions',
-                'defaultGuard'
-            ))->render(),
+            'html' => view('admin.roles.partials.form', compact('guards', 'permissions', 'defaultGuard'))->render(),
         ]);
     }
 
@@ -178,6 +156,8 @@ class RoleController extends Controller
             )
         );
 
+        $this->forgetPermissionCache();
+
         return response()->json([
             'success' => true,
             'message' => 'Role created successfully.',
@@ -189,17 +169,10 @@ class RoleController extends Controller
         abort_unless($request->ajax(), 404);
 
         $role->load('permissions');
-
-        $groupedPermissions = $role->permissions->groupBy(
-            fn ($permission) =>
-                $permission->group_name ?: 'General'
-        );
+        $groupedPermissions = $role->permissions->groupBy(fn ($permission) => $permission->group_name ?: 'General');
 
         return response()->json([
-            'html' => view('admin.roles.partials.show', compact(
-                'role',
-                'groupedPermissions'
-            ))->render(),
+            'html' => view('admin.roles.partials.show', compact('role', 'groupedPermissions'))->render(),
         ]);
     }
 
@@ -217,28 +190,17 @@ class RoleController extends Controller
             ->values();
 
         $role->load('permissions');
-
-        $rolePermissions = $role->permissions
-            ->pluck('name')
-            ->all();
+        $rolePermissions = $role->permissions->pluck('name')->all();
 
         $permissions = Permission::query()
             ->where('guard_name', $role->guard_name)
             ->orderBy('group_name')
             ->orderBy('name')
             ->get()
-            ->groupBy(
-                fn (Permission $permission) =>
-                    $permission->group_name ?: 'General'
-            );
+            ->groupBy(fn (Permission $permission) => $permission->group_name ?: 'General');
 
         return response()->json([
-            'html' => view('admin.roles.partials.form', compact(
-                'role',
-                'guards',
-                'permissions',
-                'rolePermissions'
-            ))->render(),
+            'html' => view('admin.roles.partials.form', compact('role', 'guards', 'permissions', 'rolePermissions'))->render(),
         ]);
     }
 
@@ -246,13 +208,7 @@ class RoleController extends Controller
     {
         $validated = $this->validateRole($request, $role);
 
-        if (
-            $this->isSuperAdmin($role) &&
-            (
-                $validated['name'] !== 'super_admin' ||
-                $validated['guard_name'] !== 'admin'
-            )
-        ) {
+        if ($role->isSuperAdmin() && ($validated['name'] !== 'super_admin' || $validated['guard_name'] !== 'admin')) {
             return response()->json([
                 'success' => false,
                 'message' => 'The super_admin role name and guard cannot be changed.',
@@ -271,6 +227,8 @@ class RoleController extends Controller
             )
         );
 
+        $this->forgetPermissionCache();
+
         return response()->json([
             'success' => true,
             'message' => 'Role updated successfully.',
@@ -279,7 +237,7 @@ class RoleController extends Controller
 
     public function destroy(Role $role)
     {
-        if ($this->isSuperAdmin($role)) {
+        if ($role->isSuperAdmin()) {
             return response()->json([
                 'success' => false,
                 'message' => 'The super_admin role cannot be deleted.',
@@ -287,6 +245,7 @@ class RoleController extends Controller
         }
 
         $role->delete();
+        $this->forgetPermissionCache();
 
         return response()->json([
             'success' => true,
@@ -297,29 +256,24 @@ class RoleController extends Controller
     public function multipleAction(Request $request)
     {
         $validated = $request->validate([
-            'action' => [
-                'required',
-                Rule::in([
-                    'delete',
-                    'restore',
-                    'force_delete',
-                ]),
-            ],
+            'action' => ['required', Rule::in(['delete', 'restore', 'force_delete'])],
             'ids' => ['required', 'array', 'min:1'],
             'ids.*' => ['required', 'integer', 'distinct'],
         ]);
 
-        $ids = array_values(
-            array_unique(
-                array_map('intval', $validated['ids'])
-            )
-        );
+        $ids = collect($validated['ids'])
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
 
         $message = match ($validated['action']) {
             'delete' => $this->bulkDelete($ids),
             'restore' => $this->bulkRestore($ids),
             'force_delete' => $this->bulkForceDelete($ids),
         };
+
+        $this->forgetPermissionCache();
 
         return response()->json([
             'success' => true,
@@ -330,15 +284,11 @@ class RoleController extends Controller
     public function trash(Request $request)
     {
         $query = Role::onlyTrashed()
-            ->withCount('permissions')
+            ->withCount(['permissions', 'users'])
             ->latest('deleted_at');
 
         if ($request->filled('search')) {
-            $query->where(
-                'name',
-                'like',
-                '%' . trim((string) $request->search) . '%'
-            );
+            $query->where('name', 'like', '%' . trim((string) $request->search) . '%');
         }
 
         $roles = $query->paginate(15)->withQueryString();
@@ -353,24 +303,20 @@ class RoleController extends Controller
         }
 
         $title = 'Trash Roles & Permissions';
-
         $breadcrumb = [
             ['text' => 'Roles List', 'url' => route('admin.roles.index')],
             ['text' => 'Trash', 'url' => null],
         ];
 
-        return view('admin.roles.trash', compact(
-            'roles',
-            'title',
-            'breadcrumb'
-        ));
+        return view('admin.roles.trash', compact('roles', 'title', 'breadcrumb'));
     }
 
     public function restore(int $role)
     {
-        Role::onlyTrashed()
-            ->findOrFail($role)
-            ->restore();
+        $model = Role::onlyTrashed()->findOrFail($role);
+        $model->restore();
+
+        $this->forgetPermissionCache();
 
         return response()->json([
             'success' => true,
@@ -382,7 +328,7 @@ class RoleController extends Controller
     {
         $model = Role::onlyTrashed()->findOrFail($role);
 
-        if ($this->isSuperAdmin($model)) {
+        if ($model->isSuperAdmin()) {
             return response()->json([
                 'success' => false,
                 'message' => 'The super_admin role cannot be permanently deleted.',
@@ -390,6 +336,7 @@ class RoleController extends Controller
         }
 
         $model->forceDelete();
+        $this->forgetPermissionCache();
 
         return response()->json([
             'success' => true,
@@ -397,10 +344,8 @@ class RoleController extends Controller
         ]);
     }
 
-    private function validateRole(
-        Request $request,
-        ?Role $role = null
-    ): array {
+    private function validateRole(Request $request, ?Role $role = null): array
+    {
         $guardName = (string) $request->input('guard_name', 'admin');
 
         return $request->validate([
@@ -409,36 +354,17 @@ class RoleController extends Controller
                 'string',
                 'max:255',
                 Rule::unique('roles', 'name')
-                    ->where(
-                        fn ($query) =>
-                            $query->where('guard_name', $guardName)
-                    )
+                    ->where(fn ($query) => $query->where('guard_name', $guardName))
                     ->ignore($role?->id),
             ],
-
-            'guard_name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
-            'permissions' => [
-                'nullable',
-                'array',
-            ],
-
-            'permissions.*' => [
-                'required',
-                'string',
-                'distinct',
-            ],
+            'guard_name' => ['required', 'string', 'max:255'],
+            'permissions' => ['nullable', 'array'],
+            'permissions.*' => ['required', 'string', 'distinct'],
         ]);
     }
 
-    private function validatedPermissionNames(
-        array $permissionNames,
-        string $guardName
-    ): array {
+    private function validatedPermissionNames(array $permissionNames, string $guardName): array
+    {
         $requested = collect($permissionNames)
             ->filter()
             ->map(fn ($name) => (string) $name)
@@ -464,12 +390,6 @@ class RoleController extends Controller
         return $valid->all();
     }
 
-    private function isSuperAdmin(Role $role): bool
-    {
-        return $role->name === 'super_admin'
-            && $role->guard_name === 'admin';
-    }
-
     private function bulkDelete(array $ids): string
     {
         Role::query()
@@ -485,9 +405,7 @@ class RoleController extends Controller
 
     private function bulkRestore(array $ids): string
     {
-        Role::onlyTrashed()
-            ->whereIn('id', $ids)
-            ->restore();
+        Role::onlyTrashed()->whereIn('id', $ids)->restore();
 
         return 'Selected roles restored.';
     }
@@ -503,5 +421,10 @@ class RoleController extends Controller
             ->forceDelete();
 
         return 'Selected roles permanently deleted.';
+    }
+
+    private function forgetPermissionCache(): void
+    {
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 }

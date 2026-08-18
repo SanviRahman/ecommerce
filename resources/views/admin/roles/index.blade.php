@@ -8,7 +8,6 @@
          data-bulk-url="{{ route('admin.roles.multiple_action') }}"
          data-trash-url="{{ route('admin.roles.trashed') }}">
 
-        <!-- Top Action Bar -->
         <div class="d-flex align-items-center flex-wrap mb-3" style="gap: 6px;">
             @can('role_create')
                 <button type="button" class="btn btn-primary btn-sm font-weight-bold shadow-sm" id="btnAddRecord">
@@ -29,16 +28,12 @@
                 @endcan
             </select>
 
-            <button type="button" class="btn btn-secondary btn-sm font-weight-bold px-3 shadow-sm" id="btnApplyBulk">
-                APPLY
-            </button>
+            <button type="button" class="btn btn-secondary btn-sm font-weight-bold px-3 shadow-sm" id="btnApplyBulk">APPLY</button>
         </div>
 
-        <!-- Filters Section -->
         <div class="card shadow-sm border-0 mb-3">
             <div class="card-body px-3 py-2">
                 <div class="row align-items-end">
-                    <!-- Filter by Guard -->
                     <div class="col-md-3 mb-2 mb-md-0">
                         <label for="filter_guard" class="text-muted small font-weight-bold text-uppercase mb-1">Filter By Guard</label>
                         <select id="filter_guard" class="form-control form-control-sm shadow-none">
@@ -51,7 +46,6 @@
                         </select>
                     </div>
 
-                    <!-- Search Input -->
                     <div class="col-md-7 mb-2 mb-md-0">
                         <label for="table_search" class="text-muted small font-weight-bold text-uppercase mb-1">Search Roles</label>
                         <div class="input-group input-group-sm">
@@ -72,7 +66,6 @@
             </div>
         </div>
 
-        <!-- Main Table Section -->
         @can('role_list')
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white px-3 py-3 border-bottom">
@@ -91,7 +84,6 @@
         @endcan
     </div>
 
-    <!-- AJAX Modal -->
     <div class="modal fade" id="ajaxModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
             <div class="modal-content border-0 shadow-lg">

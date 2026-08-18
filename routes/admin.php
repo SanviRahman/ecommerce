@@ -21,7 +21,7 @@ Route::middleware('admin')->group(function () {
     // Admins
     Route::post('/admins/multiple-action', [AdminController::class, 'multipleAction'])->name('admins.multiple_action');
     Route::get('/admins/trash', [AdminController::class, 'trash'])->name('admins.trashed');
-    Route::get('/admins/restore/{admin}', [AdminController::class, 'restore'])->name('admins.restore');
+    Route::post('/admins/restore/{admin}', [AdminController::class, 'restore'])->name('admins.restore');
     Route::delete('/admins/force-delete/{admin}', [AdminController::class, 'forceDelete'])->name('admins.force_delete');
     Route::get('/admins/list', [AdminController::class, 'list'])->name('admins.list');
     Route::get('/admins/ajax-search', [AdminController::class, 'list'])->name('admins.ajax_search');
@@ -30,7 +30,7 @@ Route::middleware('admin')->group(function () {
     // Roles
     Route::post('/roles/multiple-action', [RoleController::class, 'multipleAction'])->name('roles.multiple_action');
     Route::get('/roles/trash', [RoleController::class, 'trash'])->name('roles.trashed');
-    Route::get('/roles/restore/{role}', [RoleController::class, 'restore'])->name('roles.restore');
+    Route::post('/roles/restore/{role}', [RoleController::class, 'restore'])->name('roles.restore');
     Route::delete('/roles/force-delete/{role}', [RoleController::class, 'forceDelete'])->name('roles.force_delete');
     Route::get('/roles/list', [RoleController::class, 'list'])->name('roles.list');
     Route::get('/roles/ajax-search', [RoleController::class, 'list'])->name('roles.ajax_search');
@@ -40,7 +40,7 @@ Route::middleware('admin')->group(function () {
     // Permissions
     Route::post('/permissions/multiple-action', [PermissionController::class, 'multipleAction'])->name('permissions.multiple_action');
     Route::get('/permissions/trash', [PermissionController::class, 'trash'])->name('permissions.trashed');
-    Route::get('/permissions/restore/{permission}', [PermissionController::class, 'restore'])->name('permissions.restore');
+    Route::post('/permissions/restore/{permission}', [PermissionController::class, 'restore'])->name('permissions.restore');
     Route::delete('/permissions/force-delete/{permission}', [PermissionController::class, 'forceDelete'])->name('permissions.force_delete');
     Route::get('/permissions/list', [PermissionController::class, 'list'])->name('permissions.list');
     Route::get('/permissions/ajax-search', [PermissionController::class, 'list'])->name('permissions.ajax_search');

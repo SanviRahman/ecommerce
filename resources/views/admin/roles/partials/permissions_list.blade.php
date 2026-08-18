@@ -1,8 +1,11 @@
 @forelse($permissions as $groupName => $groupPermissions)
     @php
         $groupPermNames = $groupPermissions->pluck('name')->toArray();
-        $isAllGroupChecked = !empty($selectedPermissions) && count(array_intersect($groupPermNames, $selectedPermissions)) === count($groupPermNames);
+        $isAllGroupChecked = !empty($selectedPermissions)
+            && count($groupPermNames) > 0
+            && count(array_intersect($groupPermNames, $selectedPermissions)) === count($groupPermNames);
     @endphp
+
     <div class="card shadow-sm border-0 mb-3 permission-group-card">
         <div class="card-header bg-white py-2 px-3 d-flex justify-content-between align-items-center border-bottom">
             <span class="font-weight-bold text-dark text-uppercase small">
@@ -13,6 +16,7 @@
                 <label class="custom-control-label small font-weight-bold text-muted" for="group_{{ $loop->index }}">Select Group</label>
             </div>
         </div>
+
         <div class="card-body bg-white py-2 px-3">
             <div class="row">
                 @foreach($groupPermissions as $permission)
@@ -23,7 +27,7 @@
                                    name="permissions[]"
                                    value="{{ $permission->name }}"
                                    id="perm_{{ $permission->id }}"
-                                {{ in_array($permission->name, $selectedPermissions ?? []) ? 'checked' : '' }}>
+                                   {{ in_array($permission->name, $selectedPermissions ?? [], true) ? 'checked' : '' }}>
                             <label class="custom-control-label text-dark small" for="perm_{{ $permission->id }}">{{ $permission->name }}</label>
                         </div>
                     </div>

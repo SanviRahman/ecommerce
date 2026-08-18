@@ -39,17 +39,10 @@
                 <div class="card profile-card border-0 shadow-sm h-100">
                     <div class="card-body text-center p-4">
                         <div class="profile-photo-wrapper mx-auto mb-3">
-                            @if ($admin->photo)
-                                <img src="{{ asset('uploads/' . $admin->photo) }}"
-                                     id="profile-photo-preview"
-                                     class="profile-photo"
-                                     alt="{{ $admin->name }}">
-                            @else
-                                <img src="{{ asset('images/no-image.png') }}"
-                                     id="profile-photo-preview"
-                                     class="profile-photo"
-                                     alt="No Image">
-                            @endif
+                            <img src="{{ $admin->image_url }}"
+                                 id="profile-photo-preview"
+                                 class="profile-photo"
+                                 alt="{{ $admin->name }}">
                         </div>
 
                         <h4 class="font-weight-bold text-dark mb-1">
@@ -97,7 +90,7 @@
 
                                 <div class="ml-3">
                                     <small class="text-muted d-block">Photo</small>
-                                    <strong>{{ $admin->photo ? 'Uploaded' : 'Not uploaded' }}</strong>
+                                    <strong>{{ $admin->hasProfilePhoto() ? 'Uploaded' : 'Not uploaded' }}</strong>
                                 </div>
                             </div>
                         </div>
@@ -141,9 +134,7 @@
                                 </div>
 
                                 @error('name')
-                                    <span class="text-danger small d-block mt-1">
-                                        {{ $message }}
-                                    </span>
+                                    <span class="text-danger small d-block mt-1">{{ $message }}</span>
                                 @enderror
                             </div>
 
@@ -168,9 +159,7 @@
                                 </div>
 
                                 @error('username')
-                                    <span class="text-danger small d-block mt-1">
-                                        {{ $message }}
-                                    </span>
+                                    <span class="text-danger small d-block mt-1">{{ $message }}</span>
                                 @enderror
                             </div>
 
@@ -195,27 +184,21 @@
                                 </div>
 
                                 @error('email')
-                                    <span class="text-danger small d-block mt-1">
-                                        {{ $message }}
-                                    </span>
+                                    <span class="text-danger small d-block mt-1">{{ $message }}</span>
                                 @enderror
                             </div>
 
                             <div class="col-md-6 form-group">
-                                <label class="profile-label">
-                                    Profile Photo
-                                </label>
+                                <label class="profile-label">Profile Photo</label>
 
                                 <div class="custom-file">
                                     <input type="file"
                                            name="photo"
                                            id="photo"
                                            class="custom-file-input @error('photo') is-invalid @enderror"
-                                           accept="image/*">
+                                           accept="image/jpeg,image/png,image/jpg,image/webp">
 
-                                    <label class="custom-file-label" for="photo">
-                                        Select profile photo
-                                    </label>
+                                    <label class="custom-file-label" for="photo">Select profile photo</label>
                                 </div>
 
                                 <input type="hidden" name="photo_media_id" id="photo_media_id" value="">
@@ -228,9 +211,11 @@
                                 </small>
 
                                 @error('photo')
-                                    <span class="text-danger small d-block mt-1">
-                                        {{ $message }}
-                                    </span>
+                                    <span class="text-danger small d-block mt-1">{{ $message }}</span>
+                                @enderror
+
+                                @error('photo_media_id')
+                                    <span class="text-danger small d-block mt-1">{{ $message }}</span>
                                 @enderror
                             </div>
                         </div>
@@ -265,111 +250,26 @@
 
 @push('css')
     <style>
-        .profile-alert {
-            border-radius: 12px;
-        }
-
-        .profile-card,
-        .profile-form-card {
-            border-radius: 14px;
-            overflow: hidden;
-        }
-
-        .profile-card {
-            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-        }
-
-        .profile-photo-wrapper {
-            width: 155px;
-            height: 155px;
-            border-radius: 50%;
-            padding: 5px;
-            background: linear-gradient(135deg, #007bff, #20c997);
-            box-shadow: 0 12px 30px rgba(0, 123, 255, .18);
-        }
-
-        .profile-photo {
-            width: 145px;
-            height: 145px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid #ffffff;
-            background: #f8f9fa;
-        }
-
-        .profile-label {
-            color: #6c757d;
-            font-weight: 700;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: .35px;
-            margin-bottom: 6px;
-        }
-
-        .profile-info-box {
-            border: 1px solid #edf0f5;
-            border-radius: 12px;
-            padding: 16px;
-            background: #ffffff;
-        }
-
-        .profile-info-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            flex: 0 0 38px;
-        }
-
-        .bg-primary-soft {
-            background: rgba(0, 123, 255, .12);
-        }
-
-        .bg-success-soft {
-            background: rgba(40, 167, 69, .12);
-        }
-
-        .bg-warning-soft {
-            background: rgba(255, 193, 7, .18);
-        }
-
-        .input-group-text {
-            border-color: #e9ecef;
-        }
-
-        .form-control,
-        .custom-file-label {
-            border-color: #e9ecef;
-            border-radius: 8px;
-        }
-
-        .input-group .form-control {
-            border-top-left-radius: 0;
-            border-bottom-left-radius: 0;
-        }
-
-        .input-group .input-group-text {
-            border-top-left-radius: 8px;
-            border-bottom-left-radius: 8px;
-        }
-
-        .btn {
-            border-radius: 8px;
-            font-weight: 600;
-        }
+        .profile-alert { border-radius: 12px; }
+        .profile-card, .profile-form-card { border-radius: 14px; overflow: hidden; }
+        .profile-card { background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); }
+        .profile-photo-wrapper { width: 155px; height: 155px; border-radius: 50%; padding: 5px; background: linear-gradient(135deg, #007bff, #20c997); box-shadow: 0 12px 30px rgba(0, 123, 255, .18); }
+        .profile-photo { width: 145px; height: 145px; border-radius: 50%; object-fit: cover; border: 4px solid #ffffff; background: #f8f9fa; }
+        .profile-label { color: #6c757d; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .35px; margin-bottom: 6px; }
+        .profile-info-box { border: 1px solid #edf0f5; border-radius: 12px; padding: 16px; background: #ffffff; }
+        .profile-info-icon { width: 38px; height: 38px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 38px; }
+        .bg-primary-soft { background: rgba(0, 123, 255, .12); }
+        .bg-success-soft { background: rgba(40, 167, 69, .12); }
+        .bg-warning-soft { background: rgba(255, 193, 7, .18); }
+        .input-group-text { border-color: #e9ecef; }
+        .form-control, .custom-file-label { border-color: #e9ecef; border-radius: 8px; }
+        .input-group .form-control { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+        .input-group .input-group-text { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+        .btn { border-radius: 8px; font-weight: 600; }
 
         @media (max-width: 767px) {
-            .profile-photo-wrapper {
-                width: 135px;
-                height: 135px;
-            }
-
-            .profile-photo {
-                width: 125px;
-                height: 125px;
-            }
+            .profile-photo-wrapper { width: 135px; height: 135px; }
+            .profile-photo { width: 125px; height: 125px; }
         }
     </style>
 @endpush
@@ -396,6 +296,11 @@
             });
 
             $('#btnChoosePhotoMedia').on('click', function () {
+                if (typeof MediaPicker === 'undefined') {
+                    Swal.fire('Error', 'Media Picker is not available on this page.', 'error');
+                    return;
+                }
+
                 MediaPicker.open(function (media) {
                     $('#photo').val('');
                     $('.custom-file-label').html('Select profile photo');

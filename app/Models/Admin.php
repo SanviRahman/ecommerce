@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
@@ -50,7 +51,9 @@ class Admin extends Authenticatable implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('avatars')->singleFile();
+        $this->addMediaCollection('avatars')
+            ->useDisk('public')
+            ->singleFile();
     }
 
     public function adminlte_profile_url(): string
@@ -68,18 +71,43 @@ class Admin extends Authenticatable implements HasMedia
         return $this->email;
     }
 
+    public function hasProfilePhoto(): bool
+    {
+        return $this->hasMedia('avatars') || ! empty($this->photo);
+    }
+
     public function getImageUrlAttribute(): string
     {
-        if ($media = $this->getFirstMedia('avatars')) {
-            return $media->getUrl();
+        $mediaUrl = $this->getFirstMediaUrl('avatars');
+
+        if ($mediaUrl !== '') {
+            return $mediaUrl;
         }
 
-        if ($this->photo) {
-            return asset('storage/' . ltrim($this->photo, '/'));
+        if (! empty($this->photo)) {
+            $photo = ltrim((string) $this->photo, '/');
+
+            if (str_starts_with($photo, 'http://') || str_starts_with($photo, 'https://')) {
+                return $photo;
+            }
+
+            if (str_starts_with($photo, 'storage/')) {
+                return asset($photo);
+            }
+
+            if (str_starts_with($photo, 'uploads/')) {
+                return asset($photo);
+            }
+
+            if (Storage::disk('public')->exists($photo)) {
+                return Storage::disk('public')->url($photo);
+            }
+
+            if (is_file(public_path('uploads/' . $photo))) {
+                return asset('uploads/' . $photo);
+            }
         }
 
-        $name = urlencode($this->name ?: 'Admin');
-
-        return "https://ui-avatars.com/api/?name={$name}&background=random&color=fff&size=128";
+        return asset('images/no-image.png');
     }
 }
