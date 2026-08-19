@@ -59,6 +59,13 @@ class RolePermissionSeeder extends Seeder
                 ],
             ],
             [
+                'group_name' => 'Header Settings',
+                'guard_name' => 'admin',
+                'permissions' => [
+                    'header_settings',
+                ],
+            ],
+            [
                 'group_name' => 'Roles',
                 'guard_name' => 'admin',
                 'permissions' => [

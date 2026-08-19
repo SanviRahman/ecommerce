@@ -401,6 +401,13 @@ return [
             'can'   => 'identity_settings',
         ],
 
+        [
+            'text'  => 'Header Settings',
+            'route' => 'admin.header-settings.index',
+            'icon'  => 'fas fa-fw fa-heading',
+            'can'   => 'header_settings',
+        ],
+
         /*
     |--------------------------------------------------------------------------
     | System

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\HeaderSettingController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
@@ -53,8 +54,7 @@ Route::middleware('admin')->group(function () {
         Route::resource('/', PermissionController::class)->parameters(['' => 'permission']);
     });
 
-   
-   // Site Settings
+    // Site Settings
     Route::group(['prefix' => 'site-settings', 'as' => 'site-settings.'], function () {
         Route::post('multiple-action', [SiteSettingController::class, 'multipleAction'])->name('multiple_action');
         Route::get('trash', [SiteSettingController::class, 'trash'])->name('trashed');
@@ -63,5 +63,16 @@ Route::middleware('admin')->group(function () {
         Route::get('list', [SiteSettingController::class, 'list'])->name('list');
         Route::get('ajax-search', [SiteSettingController::class, 'list'])->name('ajax_search');
         Route::resource('/', SiteSettingController::class)->parameters(['' => 'site_setting']);
+    });
+
+// Header Settings
+    Route::group(['prefix' => 'header-settings', 'as' => 'header-settings.'], function () {
+        Route::post('multiple-action', [HeaderSettingController::class, 'multipleAction'])->name('multiple_action');
+        Route::get('trash', [HeaderSettingController::class, 'trash'])->name('trashed');
+        Route::post('restore/{header_setting}', [HeaderSettingController::class, 'restore'])->name('restore');
+        Route::delete('force-delete/{header_setting}', [HeaderSettingController::class, 'forceDelete'])->name('force_delete');
+        Route::get('list', [HeaderSettingController::class, 'list'])->name('list');
+        Route::get('ajax-search', [HeaderSettingController::class, 'list'])->name('ajax_search');
+        Route::resource('/', HeaderSettingController::class)->parameters(['' => 'header_setting']);
     });
 });
