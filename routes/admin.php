@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\SiteSettingController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('admin')->group(function () {
@@ -19,30 +20,48 @@ Route::middleware('admin')->group(function () {
     Route::post('/password', [ProfileController::class, 'updatePassword'])->name('update_password');
 
     // Admins
-    Route::post('/admins/multiple-action', [AdminController::class, 'multipleAction'])->name('admins.multiple_action');
-    Route::get('/admins/trash', [AdminController::class, 'trash'])->name('admins.trashed');
-    Route::post('/admins/restore/{admin}', [AdminController::class, 'restore'])->name('admins.restore');
-    Route::delete('/admins/force-delete/{admin}', [AdminController::class, 'forceDelete'])->name('admins.force_delete');
-    Route::get('/admins/list', [AdminController::class, 'list'])->name('admins.list');
-    Route::get('/admins/ajax-search', [AdminController::class, 'list'])->name('admins.ajax_search');
-    Route::resource('admins', AdminController::class);
+    Route::group(['prefix' => 'admins', 'as' => 'admins.'], function () {
+        Route::post('multiple-action', [AdminController::class, 'multipleAction'])->name('multiple_action');
+        Route::get('trash', [AdminController::class, 'trash'])->name('trashed');
+        Route::post('restore/{admin}', [AdminController::class, 'restore'])->name('restore');
+        Route::delete('force-delete/{admin}', [AdminController::class, 'forceDelete'])->name('force_delete');
+        Route::get('list', [AdminController::class, 'list'])->name('list');
+        Route::get('ajax-search', [AdminController::class, 'list'])->name('ajax_search');
+        Route::resource('/', AdminController::class)->parameters(['' => 'admin']);
+    });
 
     // Roles
-    Route::post('/roles/multiple-action', [RoleController::class, 'multipleAction'])->name('roles.multiple_action');
-    Route::get('/roles/trash', [RoleController::class, 'trash'])->name('roles.trashed');
-    Route::post('/roles/restore/{role}', [RoleController::class, 'restore'])->name('roles.restore');
-    Route::delete('/roles/force-delete/{role}', [RoleController::class, 'forceDelete'])->name('roles.force_delete');
-    Route::get('/roles/list', [RoleController::class, 'list'])->name('roles.list');
-    Route::get('/roles/ajax-search', [RoleController::class, 'list'])->name('roles.ajax_search');
-    Route::get('/roles/get-permissions', [RoleController::class, 'getPermissions'])->name('roles.get_permissions');
-    Route::resource('roles', RoleController::class);
+    Route::group(['prefix' => 'roles', 'as' => 'roles.'], function () {
+        Route::post('multiple-action', [RoleController::class, 'multipleAction'])->name('multiple_action');
+        Route::get('trash', [RoleController::class, 'trash'])->name('trashed');
+        Route::post('restore/{role}', [RoleController::class, 'restore'])->name('restore');
+        Route::delete('force-delete/{role}', [RoleController::class, 'forceDelete'])->name('force_delete');
+        Route::get('list', [RoleController::class, 'list'])->name('list');
+        Route::get('ajax-search', [RoleController::class, 'list'])->name('ajax_search');
+        Route::get('get-permissions', [RoleController::class, 'getPermissions'])->name('get_permissions');
+        Route::resource('/', RoleController::class)->parameters(['' => 'role']);
+    });
 
     // Permissions
-    Route::post('/permissions/multiple-action', [PermissionController::class, 'multipleAction'])->name('permissions.multiple_action');
-    Route::get('/permissions/trash', [PermissionController::class, 'trash'])->name('permissions.trashed');
-    Route::post('/permissions/restore/{permission}', [PermissionController::class, 'restore'])->name('permissions.restore');
-    Route::delete('/permissions/force-delete/{permission}', [PermissionController::class, 'forceDelete'])->name('permissions.force_delete');
-    Route::get('/permissions/list', [PermissionController::class, 'list'])->name('permissions.list');
-    Route::get('/permissions/ajax-search', [PermissionController::class, 'list'])->name('permissions.ajax_search');
-    Route::resource('permissions', PermissionController::class);
+    Route::group(['prefix' => 'permissions', 'as' => 'permissions.'], function () {
+        Route::post('multiple-action', [PermissionController::class, 'multipleAction'])->name('multiple_action');
+        Route::get('trash', [PermissionController::class, 'trash'])->name('trashed');
+        Route::post('restore/{permission}', [PermissionController::class, 'restore'])->name('restore');
+        Route::delete('force-delete/{permission}', [PermissionController::class, 'forceDelete'])->name('force_delete');
+        Route::get('list', [PermissionController::class, 'list'])->name('list');
+        Route::get('ajax-search', [PermissionController::class, 'list'])->name('ajax_search');
+        Route::resource('/', PermissionController::class)->parameters(['' => 'permission']);
+    });
+
+   
+   // Site Settings
+    Route::group(['prefix' => 'site-settings', 'as' => 'site-settings.'], function () {
+        Route::post('multiple-action', [SiteSettingController::class, 'multipleAction'])->name('multiple_action');
+        Route::get('trash', [SiteSettingController::class, 'trash'])->name('trashed');
+        Route::post('restore/{site_setting}', [SiteSettingController::class, 'restore'])->name('restore');
+        Route::delete('force-delete/{site_setting}', [SiteSettingController::class, 'forceDelete'])->name('force_delete');
+        Route::get('list', [SiteSettingController::class, 'list'])->name('list');
+        Route::get('ajax-search', [SiteSettingController::class, 'list'])->name('ajax_search');
+        Route::resource('/', SiteSettingController::class)->parameters(['' => 'site_setting']);
+    });
 });

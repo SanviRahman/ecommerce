@@ -48,13 +48,14 @@ class RolePermissionSeeder extends Seeder
                     'dashboard_manage',
                     'media_manage',
                     'settings',
+                    'system_tools', // <-- এখানে system_tools যোগ করা হয়েছে
+                ],
+            ],
+            [
+                'group_name' => 'Site Settings',
+                'guard_name' => 'admin',
+                'permissions' => [
                     'identity_settings',
-                    'seo_settings',
-                    'pwa_settings',
-                    'payment_gateway_settings',
-                    'sms_settings',
-                    'promo_settings',
-                    'system_tools',
                 ],
             ],
             [

@@ -394,6 +394,13 @@ return [
             'can'   => 'permission_manage',
         ],
 
+        [
+            'text'  => 'Site Settings',
+            'route' => 'admin.site-settings.index',
+            'icon'  => 'fas fa-fw fa-cogs',
+            'can'   => 'identity_settings',
+        ],
+
         /*
     |--------------------------------------------------------------------------
     | System
