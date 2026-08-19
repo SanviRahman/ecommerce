@@ -11,7 +11,7 @@ class CategoryController extends Controller
 {
     public function index(Request $request)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('list');
 
         $query = Category::query();
 
@@ -39,7 +39,7 @@ class CategoryController extends Controller
 
     public function list(Request $request)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('list');
 
         $query = Category::query();
 
@@ -53,7 +53,7 @@ class CategoryController extends Controller
 
     public function sort(Request $request)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('update');
 
         $ids = $request->input('ids', []);
         foreach ($ids as $index => $id) {
@@ -65,7 +65,7 @@ class CategoryController extends Controller
 
     public function create(Request $request)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('create');
 
         if ($request->ajax()) {
             return response()->json([
@@ -77,7 +77,7 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('create');
         $validated = $this->validateRequest($request);
 
         $validated['slug'] = $validated['slug'] ?? Str::slug($validated['name']);
@@ -93,7 +93,7 @@ class CategoryController extends Controller
 
     public function show(Request $request, Category $category)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('view');
 
         if ($request->ajax()) {
             return response()->json([
@@ -105,7 +105,7 @@ class CategoryController extends Controller
 
     public function edit(Request $request, Category $category)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('update');
 
         if ($request->ajax()) {
             return response()->json([
@@ -117,7 +117,7 @@ class CategoryController extends Controller
 
     public function update(Request $request, Category $category)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('update');
         $validated = $this->validateRequest($request, $category->id);
 
         $validated['slug'] = $validated['slug'] ?? Str::slug($validated['name']);
@@ -133,7 +133,7 @@ class CategoryController extends Controller
 
     public function destroy(Request $request, Category $category)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('delete');
 
         $category->delete();
         return response()->json(['success' => true, 'message' => 'Category moved to trash.']);
@@ -141,13 +141,19 @@ class CategoryController extends Controller
 
     public function multipleAction(Request $request)
     {
-        $this->authorizeSettings();
-
         $validated = $request->validate([
             'action' => ['required', 'in:delete,restore,force_delete'],
             'ids'    => ['required', 'array'],
             'ids.*'  => ['integer'],
         ]);
+
+        if ($validated['action'] === 'restore') {
+            $this->authorizeSettings('restore');
+        } elseif ($validated['action'] === 'force_delete') {
+            $this->authorizeSettings('force_delete');
+        } else {
+            $this->authorizeSettings('delete');
+        }
 
         $ids = $validated['ids'];
         $msg = '';
@@ -178,7 +184,7 @@ class CategoryController extends Controller
 
     public function trash(Request $request)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('trash');
 
         $query = Category::onlyTrashed()->orderBy('deleted_at', 'desc');
 
@@ -203,7 +209,7 @@ class CategoryController extends Controller
 
     public function restore(Request $request, int $id)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('restore');
 
         Category::onlyTrashed()->findOrFail($id)->restore();
         return response()->json(['success' => true, 'message' => 'Category restored successfully.']);
@@ -211,7 +217,7 @@ class CategoryController extends Controller
 
     public function forceDelete(Request $request, int $id)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('force_delete');
 
         $model = Category::onlyTrashed()->findOrFail($id);
         $model->clearMediaCollection('image');
@@ -223,20 +229,25 @@ class CategoryController extends Controller
     private function validateRequest(Request $request, ?int $id = null): array
     {
         return $request->validate([
-            'name'        => ['required', 'string', 'max:150'],
-            'slug'        => ['nullable', 'string', 'max:180', 'unique:categories,slug,' . $id],
-            'description' => ['nullable', 'string'],
-            'sort_order'  => ['required', 'integer', 'min:0'],
-            'status'      => ['required', 'boolean'],
-            'image'       => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
-            'remove_image'=> ['nullable', 'boolean'],
+            'name'         => ['required', 'string', 'max:150'],
+            'slug'         => ['nullable', 'string', 'max:180', 'unique:categories,slug,' . $id],
+            'description'  => ['nullable', 'string'],
+            'sort_order'   => ['required', 'integer', 'min:0'],
+            'status'       => ['required', 'boolean'],
+            'image'        => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'remove_image' => ['nullable', 'boolean'],
         ]);
     }
 
-    private function authorizeSettings(): void
+    private function authorizeSettings(string $action = 'manage'): void
     {
+        $user = auth('admin')->user();
+        $permission = "category_{$action}";
+
         abort_unless(
-            auth('admin')->user()?->can('category_manage') || auth('admin')->user()?->can('settings'),
+            $user?->can($permission) || 
+            $user?->can('category_manage') || 
+            $user?->can('settings'),
             403
         );
     }

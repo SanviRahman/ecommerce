@@ -12,10 +12,10 @@
                 <th style="width: 150px;" class="text-center align-middle">Actions</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="sortable-tbody">
             @forelse($categories as $category)
                 <tr data-id="{{ $category->id }}">
-                    <td class="text-center align-middle" onclick="event.stopPropagation();">
+                    <td class="text-center align-middle">
                         <input type="checkbox" class="row-checkbox" value="{{ $category->id }}">
                     </td>
                     <td class="align-middle">
@@ -32,14 +32,24 @@
                             {{ $category->status ? 'Active' : 'Inactive' }}
                         </span>
                     </td>
-                    <td class="text-center align-middle" onclick="event.stopPropagation();">
+                    <td class="text-center align-middle">
                         @if($isTrash ?? false)
-                            <button type="button" class="btn btn-sm btn-outline-success btn-restore shadow-sm mx-1" data-url="{{ route('admin.categories.restore', $category->id) }}" title="Restore"><i class="fas fa-undo"></i></button>
-                            <button type="button" class="btn btn-sm btn-outline-danger btn-force-delete shadow-sm mx-1" data-url="{{ route('admin.categories.force_delete', $category->id) }}" title="Permanent Delete"><i class="fas fa-trash-alt"></i></button>
+                            @canany(['category_restore', 'category_manage'])
+                                <button type="button" class="btn btn-sm btn-outline-success btn-restore shadow-sm mx-1" data-url="{{ route('admin.categories.restore', $category->id) }}" title="Restore"><i class="fas fa-undo"></i></button>
+                            @endcanany
+                            @canany(['category_force_delete', 'category_manage'])
+                                <button type="button" class="btn btn-sm btn-outline-danger btn-force-delete shadow-sm mx-1" data-url="{{ route('admin.categories.force_delete', $category->id) }}" title="Permanent Delete"><i class="fas fa-trash-alt"></i></button>
+                            @endcanany
                         @else
-                            <button type="button" class="btn btn-sm btn-outline-info btn-show shadow-sm mx-1" data-url="{{ route('admin.categories.show', $category->id) }}" title="View"><i class="fas fa-eye"></i></button>
-                            <button type="button" class="btn btn-sm btn-outline-primary btn-edit shadow-sm mx-1" data-url="{{ route('admin.categories.edit', $category->id) }}" title="Edit"><i class="fas fa-pen"></i></button>
-                            <button type="button" class="btn btn-sm btn-outline-danger btn-delete shadow-sm mx-1" data-url="{{ route('admin.categories.destroy', $category->id) }}" title="Trash"><i class="fas fa-trash"></i></button>
+                            @canany(['category_view', 'category_manage'])
+                                <button type="button" class="btn btn-sm btn-outline-info btn-show shadow-sm mx-1" data-url="{{ route('admin.categories.show', $category->id) }}" title="View"><i class="fas fa-eye"></i></button>
+                            @endcanany
+                            @canany(['category_update', 'category_manage'])
+                                <button type="button" class="btn btn-sm btn-outline-primary btn-edit shadow-sm mx-1" data-url="{{ route('admin.categories.edit', $category->id) }}" title="Edit"><i class="fas fa-pen"></i></button>
+                            @endcanany
+                            @canany(['category_delete', 'category_manage'])
+                                <button type="button" class="btn btn-sm btn-outline-danger btn-delete shadow-sm mx-1" data-url="{{ route('admin.categories.destroy', $category->id) }}" title="Trash"><i class="fas fa-trash"></i></button>
+                            @endcanany
                         @endif
                     </td>
                 </tr>

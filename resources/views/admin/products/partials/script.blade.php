@@ -10,7 +10,8 @@
         function loadData(url = $page.data('index-url')) {
             $wrapper.addClass('loading');
             let params = {
-                search: $('#table_search').val()
+                search: $('#table_search').val(),
+                category_id: $('#filter_category').val()
             };
 
             $.get(url, params, function(res) {
@@ -23,16 +24,13 @@
             });
         }
 
-        // Initialize jQuery UI Sortable safely
         function initSortable() {
             if ($('#sortable-tbody').length && $page.data('mode') === 'active') {
                 if (typeof $.fn.sortable === 'function') {
                     $('#sortable-tbody').sortable({
                         cancel: 'input, button, a, .btn',
                         helper: function(e, ui) {
-                            ui.children().each(function() {
-                                $(this).width($(this).width());
-                            });
+                            ui.children().each(function() { $(this).width($(this).width()); });
                             return ui;
                         },
                         update: function(event, ui) {
@@ -47,7 +45,7 @@
                                     Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.message, showConfirmButton: false, timer: 2000 });
                                 }
                             }).fail(function() {
-                                Swal.fire('Error', 'Failed to reorder categories.', 'error');
+                                Swal.fire('Error', 'Failed to reorder products.', 'error');
                             });
                         }
                     }).disableSelection();
@@ -56,11 +54,16 @@
         }
         initSortable();
 
-        $('#btnSearch').on('click', function() { loadData(); });
+        $('#btnSearch, #filter_category').on('change click', function(e) {
+            if(e.type === 'click' || this.id === 'filter_category') {
+                loadData();
+            }
+        });
         $('#table_search').on('keypress', function(e) { if(e.which === 13) loadData(); });
 
         $('#btnClearSearch, #btnResetFilter').on('click', function() {
             $('#table_search').val('');
+            $('#filter_category').val('');
             loadData();
         });
 
@@ -81,9 +84,9 @@
             });
         }
 
-        $('#btnAddRecord').on('click', function() { openModal($page.data('create-url'), 'Create New Category'); });
-        $(document).on('click', '.btn-edit', function() { openModal($(this).data('url'), 'Edit Category'); });
-        $(document).on('click', '.btn-show', function() { openModal($(this).data('url'), 'Category Details'); });
+        $('#btnAddRecord').on('click', function() { openModal($page.data('create-url'), 'Create New Product'); });
+        $(document).on('click', '.btn-edit', function() { openModal($(this).data('url'), 'Edit Product'); });
+        $(document).on('click', '.btn-show', function() { openModal($(this).data('url'), 'Product Details'); });
 
         $(document).on('submit', '#ajax-form', function(e) {
             e.preventDefault();
@@ -110,7 +113,7 @@
                     $btn.prop('disabled', false).find('.fa-spinner').remove();
                     if(xhr.status === 422) {
                         $.each(xhr.responseJSON.errors, function(field, err) {
-                            let fieldName = field.replace('.', '_');
+                            let fieldName = field.replace(/\./g, '_');
                             $(`[name="${field}"]`).addClass('is-invalid');
                             $(`.error-${fieldName}`).text(err[0]).show();
                         });

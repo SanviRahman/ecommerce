@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\FooterSettingController;
 use App\Http\Controllers\Admin\HeaderMenuItemController;
 use App\Http\Controllers\Admin\HeaderSettingController;
 use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SiteSettingController;
@@ -123,6 +124,18 @@ Route::middleware('admin')->group(function () {
         Route::get('list', [CategoryController::class, 'list'])->name('list');
         Route::get('ajax-search', [CategoryController::class, 'list'])->name('ajax_search');
         Route::resource('/', CategoryController::class)->parameters(['' => 'category']);
+    });
+
+    // Products
+    Route::group(['prefix' => 'products', 'as' => 'products.'], function () {
+        Route::post('multiple-action', [ProductController::class, 'multipleAction'])->name('multiple_action');
+        Route::post('sort', [ProductController::class, 'sort'])->name('sort');
+        Route::get('trash', [ProductController::class, 'trash'])->name('trashed');
+        Route::post('restore/{product}', [ProductController::class, 'restore'])->name('restore');
+        Route::delete('force-delete/{product}', [ProductController::class, 'forceDelete'])->name('force_delete');
+        Route::get('list', [ProductController::class, 'list'])->name('list');
+        Route::get('ajax-search', [ProductController::class, 'list'])->name('ajax_search');
+        Route::resource('/', ProductController::class)->parameters(['' => 'product']);
     });
 
 });

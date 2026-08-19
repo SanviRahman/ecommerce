@@ -32,16 +32,22 @@
                     </td>
                     <td class="text-center align-middle">
                         @if($isTrash ?? false)
-                            @can('identity_settings')
+                            @canany(['site_setting_restore', 'site_setting_manage'])
                                 <button type="button" class="btn btn-sm btn-outline-success btn-restore shadow-sm mx-1" data-url="{{ route('admin.site-settings.restore', $setting->id) }}" title="Restore"><i class="fas fa-undo"></i></button>
+                            @endcanany
+                            @canany(['site_setting_force_delete', 'site_setting_manage'])
                                 <button type="button" class="btn btn-sm btn-outline-danger btn-force-delete shadow-sm mx-1" data-url="{{ route('admin.site-settings.force_delete', $setting->id) }}" title="Permanent Delete"><i class="fas fa-trash-alt"></i></button>
-                            @endcan
+                            @endcanany
                         @else
-                            @can('identity_settings')
+                            @canany(['site_setting_view', 'site_setting_manage'])
                                 <button type="button" class="btn btn-sm btn-outline-info btn-show shadow-sm mx-1" data-url="{{ route('admin.site-settings.show', $setting->id) }}" title="View"><i class="fas fa-eye"></i></button>
+                            @endcanany
+                            @canany(['site_setting_update', 'site_setting_manage'])
                                 <button type="button" class="btn btn-sm btn-outline-primary btn-edit shadow-sm mx-1" data-url="{{ route('admin.site-settings.edit', $setting->id) }}" title="Edit"><i class="fas fa-pen"></i></button>
+                            @endcanany
+                            @canany(['site_setting_delete', 'site_setting_manage'])
                                 <button type="button" class="btn btn-sm btn-outline-danger btn-delete shadow-sm mx-1" data-url="{{ route('admin.site-settings.destroy', $setting->id) }}" title="Trash"><i class="fas fa-trash"></i></button>
-                            @endcan
+                            @endcanany
                         @endif
                     </td>
                 </tr>

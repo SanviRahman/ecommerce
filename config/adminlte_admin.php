@@ -357,6 +357,13 @@ return [
                     'can'    => 'category_manage',
                     'active' => ['admin/categories*'],
                 ],
+                [
+                    'text'   => 'Products',
+                    'route'  => 'admin.products.index',
+                    'icon'   => 'fas fa-fw fa-box',
+                    'can'    => 'product_manage',
+                    'active' => ['admin/products*'],
+                ],
 
             ],
         ],
@@ -373,14 +380,14 @@ return [
                     'text'   => 'Site Settings',
                     'route'  => 'admin.site-settings.index',
                     'icon'   => 'fas fa-fw fa-cog',
-                    'can'    => 'identity_settings',
+                    'can'    => 'site_setting_manage',
                     'active' => ['admin/site-settings*'],
                 ],
                 [
                     'text'   => 'Header Settings',
                     'route'  => 'admin.header-settings.index',
                     'icon'   => 'fas fa-fw fa-heading',
-                    'can'    => 'header_settings',
+                    'can'    => 'header_setting_manage',
                     'active' => ['admin/header-settings*'],
                 ],
                 [
@@ -394,20 +401,18 @@ return [
                     'text'   => 'Footer Settings',
                     'route'  => 'admin.footer-settings.index',
                     'icon'   => 'fas fa-fw fa-shoe-prints',
-                    'can'    => 'footer_settings',
+                    'can'    => 'footer_setting_manage',
                     'active' => ['admin/footer-settings*'],
                 ],
-
                 [
                     'text'   => 'Footer Links',
                     'route'  => 'admin.footer-links.index',
                     'icon'   => 'fas fa-fw fa-link',
-                    'can'    => 'footer_links_manage',
+                    'can'    => 'footer_link_manage',
                     'active' => ['admin/footer-links*'],
                 ],
             ],
         ],
-
         /*
     |--------------------------------------------------------------------------
     | Account

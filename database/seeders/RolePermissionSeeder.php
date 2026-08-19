@@ -1,5 +1,4 @@
 <?php
-
 namespace Database\Seeders;
 
 use App\Models\Admin;
@@ -140,6 +139,22 @@ class RolePermissionSeeder extends Seeder
                     'category_trash',
                     'category_restore',
                     'category_force_delete',
+                ],
+            ],
+
+            [
+                'group_name'  => 'Products',
+                'guard_name'  => 'admin',
+                'permissions' => [
+                    'product_manage',
+                    'product_list',
+                    'product_view',
+                    'product_create',
+                    'product_update',
+                    'product_delete',
+                    'product_trash',
+                    'product_restore',
+                    'product_force_delete',
                 ],
             ],
             [

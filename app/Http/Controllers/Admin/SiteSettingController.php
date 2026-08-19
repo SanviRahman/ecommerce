@@ -14,7 +14,7 @@ class SiteSettingController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('list');
 
         $query = SiteSetting::query();
 
@@ -46,7 +46,7 @@ class SiteSettingController extends Controller
      */
     public function list(Request $request)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('list');
 
         $query = SiteSetting::query();
 
@@ -64,7 +64,7 @@ class SiteSettingController extends Controller
      */
     public function create(Request $request)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('create');
 
         if ($request->ajax()) {
             return response()->json([
@@ -79,7 +79,7 @@ class SiteSettingController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('create');
 
         $validated = $this->validateRequest($request);
 
@@ -99,7 +99,7 @@ class SiteSettingController extends Controller
      */
     public function show(Request $request, SiteSetting $siteSetting)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('view');
 
         if ($request->ajax()) {
             return response()->json([
@@ -114,7 +114,7 @@ class SiteSettingController extends Controller
      */
     public function edit(Request $request, SiteSetting $siteSetting)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('update');
 
         if ($request->ajax()) {
             return response()->json([
@@ -129,7 +129,7 @@ class SiteSettingController extends Controller
      */
     public function update(Request $request, SiteSetting $siteSetting)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('update');
 
         $validated = $this->validateRequest($request);
 
@@ -149,7 +149,7 @@ class SiteSettingController extends Controller
      */
     public function destroy(Request $request, SiteSetting $siteSetting)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('delete');
 
         $siteSetting->delete();
         return response()->json(['success' => true, 'message' => 'Site setting moved to trash.']);
@@ -160,13 +160,19 @@ class SiteSettingController extends Controller
      */
     public function multipleAction(Request $request)
     {
-        $this->authorizeSettings();
-
         $validated = $request->validate([
             'action' => ['required', 'in:delete,restore,force_delete'],
             'ids'    => ['required', 'array'],
             'ids.*'  => ['integer'],
         ]);
+
+        if ($validated['action'] === 'restore') {
+            $this->authorizeSettings('restore');
+        } elseif ($validated['action'] === 'force_delete') {
+            $this->authorizeSettings('force_delete');
+        } else {
+            $this->authorizeSettings('delete');
+        }
 
         $ids = $validated['ids'];
         $msg = '';
@@ -201,7 +207,7 @@ class SiteSettingController extends Controller
      */
     public function trash(Request $request)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('trash');
 
         $query = SiteSetting::onlyTrashed()->orderBy('deleted_at', 'desc');
 
@@ -232,7 +238,7 @@ class SiteSettingController extends Controller
      */
     public function restore(Request $request, int $id)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('restore');
 
         SiteSetting::onlyTrashed()->findOrFail($id)->restore();
         return response()->json(['success' => true, 'message' => 'Site setting restored successfully.']);
@@ -243,7 +249,7 @@ class SiteSettingController extends Controller
      */
     public function forceDelete(Request $request, int $id)
     {
-        $this->authorizeSettings();
+        $this->authorizeSettings('force_delete');
 
         $model = SiteSetting::onlyTrashed()->findOrFail($id);
         $model->clearMediaCollection('logo');
@@ -276,10 +282,16 @@ class SiteSettingController extends Controller
         ]);
     }
 
-    private function authorizeSettings(): void
+    private function authorizeSettings(string $action = 'manage'): void
     {
+        $user = auth('admin')->user();
+        $permission = "site_setting_{$action}";
+
         abort_unless(
-            auth('admin')->user()?->can('identity_settings'),
+            $user?->can($permission) || 
+            $user?->can('site_setting_manage') || 
+            $user?->can('identity_settings') || 
+            $user?->can('settings'),
             403
         );
     }
