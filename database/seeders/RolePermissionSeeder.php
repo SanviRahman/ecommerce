@@ -1,5 +1,4 @@
 <?php
-
 namespace Database\Seeders;
 
 use App\Models\Admin;
@@ -23,7 +22,7 @@ class RolePermissionSeeder extends Seeder
 
         if (! $superAdmin) {
             $superAdmin = Role::create([
-                'name' => 'super_admin',
+                'name'       => 'super_admin',
                 'guard_name' => 'admin',
             ]);
         } elseif ($superAdmin->trashed()) {
@@ -33,18 +32,18 @@ class RolePermissionSeeder extends Seeder
         $admin = Admin::firstOrCreate(
             ['email' => 'admin@gmail.com'],
             [
-                'name' => 'Super Admin',
+                'name'     => 'Super Admin',
                 'username' => 'admin',
-                'phone' => '01700000000',
-                'status' => true,
+                'phone'    => '01700000000',
+                'status'   => true,
                 'password' => Hash::make('password'),
             ]
         );
 
         $permissions = [
             [
-                'group_name' => 'Global Settings',
-                'guard_name' => 'admin',
+                'group_name'  => 'Global Settings',
+                'guard_name'  => 'admin',
                 'permissions' => [
                     'dashboard_manage',
                     'media_manage',
@@ -53,29 +52,43 @@ class RolePermissionSeeder extends Seeder
                 ],
             ],
             [
-                'group_name' => 'Site Settings',
-                'guard_name' => 'admin',
+                'group_name'  => 'Site Settings',
+                'guard_name'  => 'admin',
                 'permissions' => [
                     'identity_settings',
                 ],
             ],
             [
-                'group_name' => 'Header Settings',
-                'guard_name' => 'admin',
+                'group_name'  => 'Header Settings',
+                'guard_name'  => 'admin',
                 'permissions' => [
                     'header_settings',
                 ],
             ],
             [
-                'group_name' => 'Header Menu',
-                'guard_name' => 'admin',
+                'group_name'  => 'Header Menu',
+                'guard_name'  => 'admin',
                 'permissions' => [
                     'header_menu_manage',
                 ],
             ],
             [
-                'group_name' => 'Roles',
-                'guard_name' => 'admin',
+                'group_name'  => 'Footer Settings',
+                'guard_name'  => 'admin',
+                'permissions' => [
+                    'footer_settings',
+                ],
+            ],
+            [
+                'group_name'  => 'Footer Links',
+                'guard_name'  => 'admin',
+                'permissions' => [
+                    'footer_links_manage',
+                ],
+            ],
+            [
+                'group_name'  => 'Roles',
+                'guard_name'  => 'admin',
                 'permissions' => [
                     'role_manage',
                     'role_list',
@@ -89,8 +102,8 @@ class RolePermissionSeeder extends Seeder
                 ],
             ],
             [
-                'group_name' => 'Permission',
-                'guard_name' => 'admin',
+                'group_name'  => 'Permission',
+                'guard_name'  => 'admin',
                 'permissions' => [
                     'permission_manage',
                     'permission_list',
@@ -104,8 +117,8 @@ class RolePermissionSeeder extends Seeder
                 ],
             ],
             [
-                'group_name' => 'Admin',
-                'guard_name' => 'admin',
+                'group_name'  => 'Admin',
+                'guard_name'  => 'admin',
                 'permissions' => [
                     'admin_manage',
                     'admin_list',
@@ -131,7 +144,7 @@ class RolePermissionSeeder extends Seeder
 
                 if (! $permission) {
                     $permission = Permission::create([
-                        'name' => $permissionName,
+                        'name'       => $permissionName,
                         'guard_name' => $group['guard_name'],
                         'group_name' => $group['group_name'],
                     ]);

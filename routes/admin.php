@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FooterLinkController;
+use App\Http\Controllers\Admin\FooterSettingController;
 use App\Http\Controllers\Admin\HeaderMenuItemController;
 use App\Http\Controllers\Admin\HeaderSettingController;
 use App\Http\Controllers\Admin\PermissionController;
@@ -77,7 +79,6 @@ Route::middleware('admin')->group(function () {
         Route::resource('/', HeaderSettingController::class)->parameters(['' => 'header_setting']);
     });
 
-    
     // Header Menu Items
     Route::group(['prefix' => 'header-menu-items', 'as' => 'header-menu-items.'], function () {
         Route::post('multiple-action', [HeaderMenuItemController::class, 'multipleAction'])->name('multiple_action');
@@ -87,6 +88,28 @@ Route::middleware('admin')->group(function () {
         Route::get('list', [HeaderMenuItemController::class, 'list'])->name('list');
         Route::get('ajax-search', [HeaderMenuItemController::class, 'list'])->name('ajax_search');
         Route::resource('/', HeaderMenuItemController::class)->parameters(['' => 'header_menu_item']);
+    });
+
+    // Footer Settings
+    Route::group(['prefix' => 'footer-settings', 'as' => 'footer-settings.'], function () {
+        Route::post('multiple-action', [FooterSettingController::class, 'multipleAction'])->name('multiple_action');
+        Route::get('trash', [FooterSettingController::class, 'trash'])->name('trashed');
+        Route::post('restore/{footer_setting}', [FooterSettingController::class, 'restore'])->name('restore');
+        Route::delete('force-delete/{footer_setting}', [FooterSettingController::class, 'forceDelete'])->name('force_delete');
+        Route::get('list', [FooterSettingController::class, 'list'])->name('list');
+        Route::get('ajax-search', [FooterSettingController::class, 'list'])->name('ajax_search');
+        Route::resource('/', FooterSettingController::class)->parameters(['' => 'footer_setting']);
+    });
+
+    // Footer Links
+    Route::group(['prefix' => 'footer-links', 'as' => 'footer-links.'], function () {
+        Route::post('multiple-action', [FooterLinkController::class, 'multipleAction'])->name('multiple_action');
+        Route::get('trash', [FooterLinkController::class, 'trash'])->name('trashed');
+        Route::post('restore/{footer_link}', [FooterLinkController::class, 'restore'])->name('restore');
+        Route::delete('force-delete/{footer_link}', [FooterLinkController::class, 'forceDelete'])->name('force_delete');
+        Route::get('list', [FooterLinkController::class, 'list'])->name('list');
+        Route::get('ajax-search', [FooterLinkController::class, 'list'])->name('ajax_search');
+        Route::resource('/', FooterLinkController::class)->parameters(['' => 'footer_link']);
     });
 
 });

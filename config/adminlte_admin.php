@@ -335,10 +335,11 @@ return [
     */
 
         [
-            'text'  => 'Dashboard',
-            'route' => 'admin.dashboard',
-            'icon'  => 'fas fa-fw fa-tachometer-alt',
-            'can'   => 'dashboard_manage',
+            'text'   => 'Dashboard',
+            'route'  => 'admin.dashboard',
+            'icon'   => 'fas fa-fw fa-tachometer-alt',
+            'can'    => 'dashboard_manage',
+            'active' => ['admin', 'admin/dashboard'],
         ],
 
         [
@@ -350,22 +351,40 @@ return [
             'icon'    => 'fas fa-fw fa-cogs',
             'submenu' => [
                 [
-                    'text'  => 'Site Settings',
-                    'route' => 'admin.site-settings.index',
-                    'icon'  => 'fas fa-fw fa-cog',
-                    'can'   => 'identity_settings',
+                    'text'   => 'Site Settings',
+                    'route'  => 'admin.site-settings.index',
+                    'icon'   => 'fas fa-fw fa-cog',
+                    'can'    => 'identity_settings',
+                    'active' => ['admin/site-settings*'],
                 ],
                 [
-                    'text'  => 'Header Settings',
-                    'route' => 'admin.header-settings.index',
-                    'icon'  => 'fas fa-fw fa-heading',
-                    'can'   => 'header_settings',
+                    'text'   => 'Header Settings',
+                    'route'  => 'admin.header-settings.index',
+                    'icon'   => 'fas fa-fw fa-heading',
+                    'can'    => 'header_settings',
+                    'active' => ['admin/header-settings*'],
                 ],
                 [
-                    'text'  => 'Header Menu',
-                    'route' => 'admin.header-menu-items.index',
-                    'icon'  => 'fas fa-fw fa-bars',
-                    'can'   => 'header_menu_manage',
+                    'text'   => 'Header Menu',
+                    'route'  => 'admin.header-menu-items.index',
+                    'icon'   => 'fas fa-fw fa-bars',
+                    'can'    => 'header_menu_manage',
+                    'active' => ['admin/header-menu-items*'],
+                ],
+                [
+                    'text'   => 'Footer Settings',
+                    'route'  => 'admin.footer-settings.index',
+                    'icon'   => 'fas fa-fw fa-shoe-prints',
+                    'can'    => 'footer_settings',
+                    'active' => ['admin/footer-settings*'],
+                ],
+
+                [
+                    'text'   => 'Footer Links',
+                    'route'  => 'admin.footer-links.index',
+                    'icon'   => 'fas fa-fw fa-link',
+                    'can'    => 'footer_links_manage',
+                    'active' => ['admin/footer-links*'],
                 ],
             ],
         ],
@@ -381,15 +400,17 @@ return [
         ],
 
         [
-            'text'  => 'Profile',
-            'route' => 'admin.profile',
-            'icon'  => 'fas fa-fw fa-user-circle',
+            'text'   => 'Profile',
+            'route'  => 'admin.profile',
+            'icon'   => 'fas fa-fw fa-user-circle',
+            'active' => ['admin/profile*'],
         ],
 
         [
-            'text'  => 'Change Password',
-            'route' => 'admin.password',
-            'icon'  => 'fas fa-fw fa-key',
+            'text'   => 'Change Password',
+            'route'  => 'admin.password',
+            'icon'   => 'fas fa-fw fa-key',
+            'active' => ['admin/password*'],
         ],
 
         /*
@@ -403,24 +424,27 @@ return [
         ],
 
         [
-            'text'  => 'Admins',
-            'route' => 'admin.admins.index',
-            'icon'  => 'fas fa-fw fa-user-shield',
-            'can'   => 'admin_manage',
+            'text'   => 'Admins',
+            'route'  => 'admin.admins.index',
+            'icon'   => 'fas fa-fw fa-user-shield',
+            'can'    => 'admin_manage',
+            'active' => ['admin/admins*'],
         ],
 
         [
-            'text'  => 'Roles',
-            'route' => 'admin.roles.index',
-            'icon'  => 'fas fa-fw fa-user-tag',
-            'can'   => 'role_manage',
+            'text'   => 'Roles',
+            'route'  => 'admin.roles.index',
+            'icon'   => 'fas fa-fw fa-user-tag',
+            'can'    => 'role_manage',
+            'active' => ['admin/roles*'],
         ],
 
         [
-            'text'  => 'Permissions',
-            'route' => 'admin.permissions.index',
-            'icon'  => 'fas fa-fw fa-key',
-            'can'   => 'permission_manage',
+            'text'   => 'Permissions',
+            'route'  => 'admin.permissions.index',
+            'icon'   => 'fas fa-fw fa-key',
+            'can'    => 'permission_manage',
+            'active' => ['admin/permissions*'],
         ],
 
         /*
