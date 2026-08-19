@@ -343,6 +343,25 @@ return [
         ],
 
         [
+            'header' => 'ECOMMERCE',
+        ],
+
+        [
+            'text'    => 'Ecommerce',
+            'icon'    => 'fas fa-fw fa-shopping-cart',
+            'submenu' => [
+                [
+                    'text'   => 'Categories',
+                    'route'  => 'admin.categories.index',
+                    'icon'   => 'fas fa-fw fa-tags',
+                    'can'    => 'category_manage',
+                    'active' => ['admin/categories*'],
+                ],
+
+            ],
+        ],
+
+        [
             'header' => 'SETTINGS',
         ],
 

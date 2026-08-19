@@ -9,14 +9,20 @@
 
         <!-- Top Action Bar -->
         <div class="d-flex align-items-center flex-wrap mb-3" style="gap: 6px;">
-            <a href="{{ route('admin.header-menu-items.index') }}" class="btn btn-secondary btn-sm font-weight-bold shadow-sm">
-                <i class="fas fa-arrow-left mr-1"></i> Back to Menu Items
-            </a>
+            @can('header_menu_list')
+                <a href="{{ route('admin.header-menu-items.index') }}" class="btn btn-secondary btn-sm font-weight-bold shadow-sm">
+                    <i class="fas fa-arrow-left mr-1"></i> Back to Menu Items
+                </a>
+            @endcan
 
             <select id="bulk_action" class="form-control form-control-sm shadow-none" style="width: 210px;">
                 <option value="">-- Bulk Actions --</option>
-                <option value="restore">Restore Selected</option>
-                <option value="force_delete">Permanently Delete</option>
+                @can('header_menu_restore')
+                    <option value="restore">Restore Selected</option>
+                @endcan
+                @can('header_menu_force_delete')
+                    <option value="force_delete">Permanently Delete</option>
+                @endcan
             </select>
 
             <button type="button" class="btn btn-secondary btn-sm font-weight-bold px-3 shadow-sm" id="btnApplyBulk">
@@ -49,20 +55,26 @@
         </div>
 
         <!-- Main Table Section -->
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-white px-3 py-3 border-bottom text-danger">
-                <h3 class="card-title font-weight-bold mb-0">
-                    <i class="fas fa-trash-alt mr-2"></i>Trash Bin (Header Menu Items)
-                </h3>
-            </div>
+        @can('header_menu_trash')
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white px-3 py-3 border-bottom text-danger">
+                    <h3 class="card-title font-weight-bold mb-0">
+                        <i class="fas fa-trash-alt mr-2"></i>Trash Bin (Header Menu Items)
+                    </h3>
+                </div>
 
-            <div class="card-body p-0" id="content-wrapper" style="min-height: 340px;">
-                @include('admin.header-menu-items.partials.table', [
-                    'headerMenuItems' => $headerMenuItems,
-                    'isTrash' => true,
-                ])
+                <div class="card-body p-0" id="content-wrapper" style="min-height: 340px;">
+                    @include('admin.header-menu-items.partials.table', [
+                        'headerMenuItems' => $headerMenuItems,
+                        'isTrash' => true,
+                    ])
+                </div>
             </div>
-        </div>
+        @else
+            <div class="alert alert-warning border-0 shadow-sm mt-4 font-weight-bold">
+                <i class="fas fa-exclamation-triangle mr-2"></i> You do not have permission to view trashed header menu items.
+            </div>
+        @endcan
     </div>
 @endsection
 

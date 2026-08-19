@@ -11,11 +11,13 @@
 
         <!-- Top Action Bar -->
         <div class="d-flex align-items-center flex-wrap mb-3" style="gap: 6px;">
-            @can('identity_settings')
+            @can('site_setting_create')
                 <button type="button" class="btn btn-primary btn-sm font-weight-bold shadow-sm" id="btnAddRecord">
                     <i class="fas fa-plus mr-1"></i>Add New Setting
                 </button>
+            @endcan
 
+            @can('site_setting_trash')
                 <a href="{{ route('admin.site-settings.trashed') }}" class="btn btn-outline-danger btn-sm font-weight-bold shadow-sm">
                     <i class="fas fa-trash-alt mr-1"></i>Trash Bin
                 </a>
@@ -23,7 +25,7 @@
 
             <select id="bulk_action" class="form-control form-control-sm shadow-none" style="width: 190px;">
                 <option value="">-- Bulk Actions --</option>
-                @can('identity_settings')
+                @can('site_setting_delete')
                     <option value="delete">Move to Trash</option>
                 @endcan
             </select>
@@ -59,7 +61,7 @@
         </div>
 
         <!-- Main Table Section -->
-        @can('identity_settings')
+        @can('site_setting_list')
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white px-3 py-3 border-bottom">
                     <h3 class="card-title font-weight-bold text-dark mb-0">

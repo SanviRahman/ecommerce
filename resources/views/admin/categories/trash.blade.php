@@ -4,23 +4,23 @@
     <div id="page-manager"
          class="container-fluid py-3"
          data-mode="trash"
-         data-index-url="{{ route('admin.site-settings.trashed') }}"
-         data-bulk-url="{{ route('admin.site-settings.multiple_action') }}">
+         data-index-url="{{ route('admin.categories.trashed') }}"
+         data-bulk-url="{{ route('admin.categories.multiple_action') }}">
 
         <!-- Top Action Bar -->
         <div class="d-flex align-items-center flex-wrap mb-3" style="gap: 6px;">
-            @can('site_setting_list')
-                <a href="{{ route('admin.site-settings.index') }}" class="btn btn-secondary btn-sm font-weight-bold shadow-sm">
-                    <i class="fas fa-arrow-left mr-1"></i> Back to Settings
+            @can('category_list')
+                <a href="{{ route('admin.categories.index') }}" class="btn btn-secondary btn-sm font-weight-bold shadow-sm">
+                    <i class="fas fa-arrow-left mr-1"></i> Back to Categories
                 </a>
             @endcan
 
             <select id="bulk_action" class="form-control form-control-sm shadow-none" style="width: 210px;">
                 <option value="">-- Bulk Actions --</option>
-                @can('site_setting_restore')
+                @can('category_restore')
                     <option value="restore">Restore Selected</option>
                 @endcan
-                @can('site_setting_force_delete')
+                @can('category_force_delete')
                     <option value="force_delete">Permanently Delete</option>
                 @endcan
             </select>
@@ -35,9 +35,9 @@
             <div class="card-body px-3 py-2">
                 <div class="row align-items-end">
                     <div class="col-md-10 mb-2 mb-md-0">
-                        <label for="table_search" class="text-muted small font-weight-bold text-uppercase mb-1">Search Trashed Settings</label>
+                        <label for="table_search" class="text-muted small font-weight-bold text-uppercase mb-1">Search Trashed Categories</label>
                         <div class="input-group input-group-sm">
-                            <input type="text" id="table_search" class="form-control shadow-none" autocomplete="off" placeholder="Search name or email...">
+                            <input type="text" id="table_search" class="form-control shadow-none" autocomplete="off" placeholder="Search name...">
                             <div class="input-group-append">
                                 <button type="button" class="btn btn-outline-secondary" id="btnClearSearch" title="Clear"><i class="fas fa-times"></i></button>
                                 <button type="button" class="btn btn-primary" id="btnSearch" title="Search"><i class="fas fa-search"></i></button>
@@ -55,24 +55,24 @@
         </div>
 
         <!-- Main Table Section -->
-        @can('site_setting_trash')
+        @can('category_trash')
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white px-3 py-3 border-bottom text-danger">
                     <h3 class="card-title font-weight-bold mb-0">
-                        <i class="fas fa-trash-alt mr-2"></i>Trash Bin (Site Settings)
+                        <i class="fas fa-trash-alt mr-2"></i>Trash Bin (Categories)
                     </h3>
                 </div>
 
                 <div class="card-body p-0" id="content-wrapper" style="min-height: 340px;">
-                    @include('admin.site-settings.partials.table', [
-                        'siteSettings' => $siteSettings,
+                    @include('admin.categories.partials.table', [
+                        'categories' => $categories,
                         'isTrash' => true,
                     ])
                 </div>
             </div>
         @else
             <div class="alert alert-warning border-0 shadow-sm mt-4 font-weight-bold">
-                <i class="fas fa-exclamation-triangle mr-2"></i> You do not have permission to view trashed settings.
+                <i class="fas fa-exclamation-triangle mr-2"></i> You do not have permission to view trashed categories.
             </div>
         @endcan
     </div>
@@ -87,5 +87,5 @@
 @endpush
 
 @section('js')
-    @include('admin.site-settings.partials.script')
+    @include('admin.categories.partials.script')
 @endsection

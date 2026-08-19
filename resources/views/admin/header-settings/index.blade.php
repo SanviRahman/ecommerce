@@ -11,17 +11,23 @@
 
         <!-- Top Action Bar -->
         <div class="d-flex align-items-center flex-wrap mb-3" style="gap: 6px;">
-            <button type="button" class="btn btn-primary btn-sm font-weight-bold shadow-sm" id="btnAddRecord">
-                <i class="fas fa-plus mr-1"></i>Add New Header Setting
-            </button>
+            @can('header_setting_create')
+                <button type="button" class="btn btn-primary btn-sm font-weight-bold shadow-sm" id="btnAddRecord">
+                    <i class="fas fa-plus mr-1"></i>Add New Header Setting
+                </button>
+            @endcan
 
-            <a href="{{ route('admin.header-settings.trashed') }}" class="btn btn-outline-danger btn-sm font-weight-bold shadow-sm">
-                <i class="fas fa-trash-alt mr-1"></i>Trash Bin
-            </a>
+            @can('header_setting_trash')
+                <a href="{{ route('admin.header-settings.trashed') }}" class="btn btn-outline-danger btn-sm font-weight-bold shadow-sm">
+                    <i class="fas fa-trash-alt mr-1"></i>Trash Bin
+                </a>
+            @endcan
 
             <select id="bulk_action" class="form-control form-control-sm shadow-none" style="width: 190px;">
                 <option value="">-- Bulk Actions --</option>
-                <option value="delete">Move to Trash</option>
+                @can('header_setting_delete')
+                    <option value="delete">Move to Trash</option>
+                @endcan
             </select>
 
             <button type="button" class="btn btn-secondary btn-sm font-weight-bold px-3 shadow-sm" id="btnApplyBulk">
@@ -54,16 +60,22 @@
         </div>
 
         <!-- Main Table Section -->
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-white px-3 py-3 border-bottom">
-                <h3 class="card-title font-weight-bold text-dark mb-0">
-                    <i class="fas fa-heading text-primary mr-1"></i>Header Settings List
-                </h3>
+        @can('header_setting_list')
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white px-3 py-3 border-bottom">
+                    <h3 class="card-title font-weight-bold text-dark mb-0">
+                        <i class="fas fa-heading text-primary mr-1"></i>Header Settings List
+                    </h3>
+                </div>
+                <div class="card-body p-0" id="content-wrapper" style="min-height: 340px;">
+                    @include('admin.header-settings.partials.table', ['headerSettings' => $headerSettings, 'isTrash' => false])
+                </div>
             </div>
-            <div class="card-body p-0" id="content-wrapper" style="min-height: 340px;">
-                @include('admin.header-settings.partials.table', ['headerSettings' => $headerSettings, 'isTrash' => false])
+        @else
+            <div class="alert alert-warning border-0 shadow-sm mt-4 font-weight-bold">
+                <i class="fas fa-exclamation-triangle mr-2"></i> You do not have permission to view header settings.
             </div>
-        </div>
+        @endcan
     </div>
 
     <!-- AJAX Modal -->

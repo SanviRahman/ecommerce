@@ -4,28 +4,29 @@
     <div id="page-manager"
          class="container-fluid py-3"
          data-mode="active"
-         data-index-url="{{ route('admin.footer-settings.index') }}"
-         data-create-url="{{ route('admin.footer-settings.create') }}"
-         data-bulk-url="{{ route('admin.footer-settings.multiple_action') }}"
-         data-trash-url="{{ route('admin.footer-settings.trashed') }}">
+         data-index-url="{{ route('admin.categories.index') }}"
+         data-create-url="{{ route('admin.categories.create') }}"
+         data-bulk-url="{{ route('admin.categories.multiple_action') }}"
+         data-sort-url="{{ route('admin.categories.sort') }}"
+         data-trash-url="{{ route('admin.categories.trashed') }}">
 
         <!-- Top Action Bar -->
         <div class="d-flex align-items-center flex-wrap mb-3" style="gap: 6px;">
-            @can('footer_setting_create')
+            @can('category_create')
                 <button type="button" class="btn btn-primary btn-sm font-weight-bold shadow-sm" id="btnAddRecord">
-                    <i class="fas fa-plus mr-1"></i>Add New Footer Setting
+                    <i class="fas fa-plus mr-1"></i>Add New Category
                 </button>
             @endcan
 
-            @can('footer_setting_trash')
-                <a href="{{ route('admin.footer-settings.trashed') }}" class="btn btn-outline-danger btn-sm font-weight-bold shadow-sm">
+            @can('category_trash')
+                <a href="{{ route('admin.categories.trashed') }}" class="btn btn-outline-danger btn-sm font-weight-bold shadow-sm">
                     <i class="fas fa-trash-alt mr-1"></i>Trash Bin
                 </a>
             @endcan
 
             <select id="bulk_action" class="form-control form-control-sm shadow-none" style="width: 190px;">
                 <option value="">-- Bulk Actions --</option>
-                @can('footer_setting_delete')
+                @can('category_delete')
                     <option value="delete">Move to Trash</option>
                 @endcan
             </select>
@@ -40,9 +41,9 @@
             <div class="card-body px-3 py-2">
                 <div class="row align-items-end">
                     <div class="col-md-10 mb-2 mb-md-0">
-                        <label for="table_search" class="text-muted small font-weight-bold text-uppercase mb-1">Search Footer Settings</label>
+                        <label for="table_search" class="text-muted small font-weight-bold text-uppercase mb-1">Search Categories</label>
                         <div class="input-group input-group-sm">
-                            <input type="text" id="table_search" class="form-control shadow-none" autocomplete="off" placeholder="Search by about heading or copyright...">
+                            <input type="text" id="table_search" class="form-control shadow-none" autocomplete="off" placeholder="Search by name or slug...">
                             <div class="input-group-append">
                                 <button type="button" class="btn btn-outline-secondary" id="btnClearSearch" title="Clear"><i class="fas fa-times"></i></button>
                                 <button type="button" class="btn btn-primary" id="btnSearch" title="Search"><i class="fas fa-search"></i></button>
@@ -60,20 +61,20 @@
         </div>
 
         <!-- Main Table Section -->
-        @can('footer_setting_list')
+        @can('category_list')
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white px-3 py-3 border-bottom">
                     <h3 class="card-title font-weight-bold text-dark mb-0">
-                        <i class="fas fa-shoe-prints text-primary mr-1"></i>Footer Settings List
+                        <i class="fas fa-tags text-primary mr-1"></i>Categories List (Drag & Drop to Sort)
                     </h3>
                 </div>
                 <div class="card-body p-0" id="content-wrapper" style="min-height: 340px;">
-                    @include('admin.footer-settings.partials.table', ['footerSettings' => $footerSettings, 'isTrash' => false])
+                    @include('admin.categories.partials.table', ['categories' => $categories, 'isTrash' => false])
                 </div>
             </div>
         @else
             <div class="alert alert-warning border-0 shadow-sm mt-4 font-weight-bold">
-                <i class="fas fa-exclamation-triangle mr-2"></i> You do not have permission to view footer settings.
+                <i class="fas fa-exclamation-triangle mr-2"></i> You do not have permission to view categories.
             </div>
         @endcan
     </div>
@@ -83,7 +84,7 @@
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header border-bottom-0 pb-0">
-                    <h5 class="modal-title font-weight-bold text-primary" id="modal-title">Footer Setting Management</h5>
+                    <h5 class="modal-title font-weight-bold text-primary" id="modal-title">Category Management</h5>
                     <button type="button" class="close px-4 shadow-none" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -95,13 +96,17 @@
 @endsection
 
 @section('plugins.Sweetalert2', true)
+@section('plugins.JqueryUI', true) {{-- Required for Sortable --}}
 
 @push('css')
     <style>
         #content-wrapper.loading { opacity: 0.5; pointer-events: none; transition: opacity 0.3s ease-in-out; }
+        .sortable-row { cursor: grab; }
+        .sortable-row:active { cursor: grabbing; }
+        .ui-sortable-helper { background-color: #f8f9fc !important; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: table; }
     </style>
 @endpush
 
 @section('js')
-    @include('admin.footer-settings.partials.script')
+    @include('admin.categories.partials.script')
 @endsection

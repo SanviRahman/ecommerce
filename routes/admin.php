@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FooterLinkController;
 use App\Http\Controllers\Admin\FooterSettingController;
@@ -110,6 +111,18 @@ Route::middleware('admin')->group(function () {
         Route::get('list', [FooterLinkController::class, 'list'])->name('list');
         Route::get('ajax-search', [FooterLinkController::class, 'list'])->name('ajax_search');
         Route::resource('/', FooterLinkController::class)->parameters(['' => 'footer_link']);
+    });
+
+    // Categories
+    Route::group(['prefix' => 'categories', 'as' => 'categories.'], function () {
+        Route::post('multiple-action', [CategoryController::class, 'multipleAction'])->name('multiple_action');
+        Route::post('sort', [CategoryController::class, 'sort'])->name('sort');
+        Route::get('trash', [CategoryController::class, 'trash'])->name('trashed');
+        Route::post('restore/{category}', [CategoryController::class, 'restore'])->name('restore');
+        Route::delete('force-delete/{category}', [CategoryController::class, 'forceDelete'])->name('force_delete');
+        Route::get('list', [CategoryController::class, 'list'])->name('list');
+        Route::get('ajax-search', [CategoryController::class, 'list'])->name('ajax_search');
+        Route::resource('/', CategoryController::class)->parameters(['' => 'category']);
     });
 
 });

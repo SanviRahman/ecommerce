@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Seeders;
 
 use App\Models\Admin;
@@ -55,14 +56,30 @@ class RolePermissionSeeder extends Seeder
                 'group_name'  => 'Site Settings',
                 'guard_name'  => 'admin',
                 'permissions' => [
-                    'identity_settings',
+                    'site_setting_manage',
+                    'site_setting_list',
+                    'site_setting_view',
+                    'site_setting_create',
+                    'site_setting_update',
+                    'site_setting_delete',
+                    'site_setting_trash',
+                    'site_setting_restore',
+                    'site_setting_force_delete',
                 ],
             ],
             [
                 'group_name'  => 'Header Settings',
                 'guard_name'  => 'admin',
                 'permissions' => [
-                    'header_settings',
+                    'header_setting_manage',
+                    'header_setting_list',
+                    'header_setting_view',
+                    'header_setting_create',
+                    'header_setting_update',
+                    'header_setting_delete',
+                    'header_setting_trash',
+                    'header_setting_restore',
+                    'header_setting_force_delete',
                 ],
             ],
             [
@@ -70,20 +87,59 @@ class RolePermissionSeeder extends Seeder
                 'guard_name'  => 'admin',
                 'permissions' => [
                     'header_menu_manage',
+                    'header_menu_list',
+                    'header_menu_view',
+                    'header_menu_create',
+                    'header_menu_update',
+                    'header_menu_delete',
+                    'header_menu_trash',
+                    'header_menu_restore',
+                    'header_menu_force_delete',
                 ],
             ],
             [
                 'group_name'  => 'Footer Settings',
                 'guard_name'  => 'admin',
                 'permissions' => [
-                    'footer_settings',
+                    'footer_setting_manage',
+                    'footer_setting_list',
+                    'footer_setting_view',
+                    'footer_setting_create',
+                    'footer_setting_update',
+                    'footer_setting_delete',
+                    'footer_setting_trash',
+                    'footer_setting_restore',
+                    'footer_setting_force_delete',
                 ],
             ],
             [
                 'group_name'  => 'Footer Links',
                 'guard_name'  => 'admin',
                 'permissions' => [
-                    'footer_links_manage',
+                    'footer_link_manage',
+                    'footer_link_list',
+                    'footer_link_view',
+                    'footer_link_create',
+                    'footer_link_update',
+                    'footer_link_delete',
+                    'footer_link_trash',
+                    'footer_link_restore',
+                    'footer_link_force_delete',
+                ],
+            ],
+            [
+                'group_name'  => 'Categories',
+                'guard_name'  => 'admin',
+                'permissions' => [
+                    'category_manage',
+                    'category_list',
+                    'category_view',
+                    'category_create',
+                    'category_update',
+                    'category_delete',
+                    'category_trash',
+                    'category_restore',
+                    'category_force_delete',
                 ],
             ],
             [
@@ -165,7 +221,6 @@ class RolePermissionSeeder extends Seeder
         }
 
         $superAdmin->syncPermissions($permissionModels);
-
         $admin->syncRoles([$superAdmin]);
 
         // Seed Default Header Menu Items
@@ -174,11 +229,22 @@ class RolePermissionSeeder extends Seeder
             ['label' => 'Services', 'route_name' => 'services.index', 'sort_order' => 2, 'status' => true],
             ['label' => 'About', 'route_name' => 'about.index', 'sort_order' => 3, 'status' => true],
             ['label' => 'Products', 'route_name' => 'products.index', 'sort_order' => 4, 'status' => true],
-            ['label' => 'Contact Us', 'route_name' => 'contact.index', 'sort_order' => 5, 'status' => true],
+            ['label' => 'Contact Us', 'route_name' => 'contact.index', 'sort_order' => 5, 'status`' => true],
         ];
 
         foreach ($defaultMenuItems as $item) {
-            HeaderMenuItem::firstOrCreate(['label' => $item['label']], $item);
+            $menuItem = HeaderMenuItem::withTrashed()
+                ->where('label', $item['label'])
+                ->first();
+
+            if (! $menuItem) {
+                HeaderMenuItem::create($item);
+            } else {
+                if ($menuItem->trashed()) {
+                    $menuItem->restore();
+                }
+                $menuItem->update($item);
+            }
         }
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
