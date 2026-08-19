@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Admin;
+use App\Models\HeaderMenuItem;
 use App\Models\Permission;
 use App\Models\Role;
 use Illuminate\Database\Seeder;
@@ -48,7 +49,7 @@ class RolePermissionSeeder extends Seeder
                     'dashboard_manage',
                     'media_manage',
                     'settings',
-                    'system_tools', // <-- এখানে system_tools যোগ করা হয়েছে
+                    'system_tools',
                 ],
             ],
             [
@@ -63,6 +64,13 @@ class RolePermissionSeeder extends Seeder
                 'guard_name' => 'admin',
                 'permissions' => [
                     'header_settings',
+                ],
+            ],
+            [
+                'group_name' => 'Header Menu',
+                'guard_name' => 'admin',
+                'permissions' => [
+                    'header_menu_manage',
                 ],
             ],
             [
@@ -146,6 +154,19 @@ class RolePermissionSeeder extends Seeder
         $superAdmin->syncPermissions($permissionModels);
 
         $admin->syncRoles([$superAdmin]);
+
+        // Seed Default Header Menu Items
+        $defaultMenuItems = [
+            ['label' => 'Home', 'route_name' => 'home', 'sort_order' => 1, 'status' => true],
+            ['label' => 'Services', 'route_name' => 'services.index', 'sort_order' => 2, 'status' => true],
+            ['label' => 'About', 'route_name' => 'about.index', 'sort_order' => 3, 'status' => true],
+            ['label' => 'Products', 'route_name' => 'products.index', 'sort_order' => 4, 'status' => true],
+            ['label' => 'Contact Us', 'route_name' => 'contact.index', 'sort_order' => 5, 'status' => true],
+        ];
+
+        foreach ($defaultMenuItems as $item) {
+            HeaderMenuItem::firstOrCreate(['label' => $item['label']], $item);
+        }
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }

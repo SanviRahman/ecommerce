@@ -341,6 +341,35 @@ return [
             'can'   => 'dashboard_manage',
         ],
 
+        [
+            'header' => 'SETTINGS',
+        ],
+
+        [
+            'text'    => 'Website Settings',
+            'icon'    => 'fas fa-fw fa-cogs',
+            'submenu' => [
+                [
+                    'text'  => 'Site Settings',
+                    'route' => 'admin.site-settings.index',
+                    'icon'  => 'fas fa-fw fa-cog',
+                    'can'   => 'identity_settings',
+                ],
+                [
+                    'text'  => 'Header Settings',
+                    'route' => 'admin.header-settings.index',
+                    'icon'  => 'fas fa-fw fa-heading',
+                    'can'   => 'header_settings',
+                ],
+                [
+                    'text'  => 'Header Menu',
+                    'route' => 'admin.header-menu-items.index',
+                    'icon'  => 'fas fa-fw fa-bars',
+                    'can'   => 'header_menu_manage',
+                ],
+            ],
+        ],
+
         /*
     |--------------------------------------------------------------------------
     | Account
@@ -392,20 +421,6 @@ return [
             'route' => 'admin.permissions.index',
             'icon'  => 'fas fa-fw fa-key',
             'can'   => 'permission_manage',
-        ],
-
-        [
-            'text'  => 'Site Settings',
-            'route' => 'admin.site-settings.index',
-            'icon'  => 'fas fa-fw fa-cogs',
-            'can'   => 'identity_settings',
-        ],
-
-        [
-            'text'  => 'Header Settings',
-            'route' => 'admin.header-settings.index',
-            'icon'  => 'fas fa-fw fa-heading',
-            'can'   => 'header_settings',
         ],
 
         /*

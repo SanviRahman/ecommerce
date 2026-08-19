@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\HeaderMenuItemController;
 use App\Http\Controllers\Admin\HeaderSettingController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProfileController;
@@ -65,7 +66,7 @@ Route::middleware('admin')->group(function () {
         Route::resource('/', SiteSettingController::class)->parameters(['' => 'site_setting']);
     });
 
-// Header Settings
+    // Header Settings
     Route::group(['prefix' => 'header-settings', 'as' => 'header-settings.'], function () {
         Route::post('multiple-action', [HeaderSettingController::class, 'multipleAction'])->name('multiple_action');
         Route::get('trash', [HeaderSettingController::class, 'trash'])->name('trashed');
@@ -75,4 +76,17 @@ Route::middleware('admin')->group(function () {
         Route::get('ajax-search', [HeaderSettingController::class, 'list'])->name('ajax_search');
         Route::resource('/', HeaderSettingController::class)->parameters(['' => 'header_setting']);
     });
+
+    
+    // Header Menu Items
+    Route::group(['prefix' => 'header-menu-items', 'as' => 'header-menu-items.'], function () {
+        Route::post('multiple-action', [HeaderMenuItemController::class, 'multipleAction'])->name('multiple_action');
+        Route::get('trash', [HeaderMenuItemController::class, 'trash'])->name('trashed');
+        Route::post('restore/{header_menu_item}', [HeaderMenuItemController::class, 'restore'])->name('restore');
+        Route::delete('force-delete/{header_menu_item}', [HeaderMenuItemController::class, 'forceDelete'])->name('force_delete');
+        Route::get('list', [HeaderMenuItemController::class, 'list'])->name('list');
+        Route::get('ajax-search', [HeaderMenuItemController::class, 'list'])->name('ajax_search');
+        Route::resource('/', HeaderMenuItemController::class)->parameters(['' => 'header_menu_item']);
+    });
+
 });
