@@ -247,6 +247,21 @@ class RolePermissionSeeder extends Seeder
                     'admin_force_delete',
                 ],
             ],
+            [
+                'group_name'  => 'Contact Messages',
+                'guard_name'  => 'admin',
+                'permissions' => [
+                    'contact_message_manage',
+                    'contact_message_list',
+                    'contact_message_view',
+                    'contact_message_create',
+                    'contact_message_update',
+                    'contact_message_delete',
+                    'contact_message_trash',
+                    'contact_message_restore',
+                    'contact_message_force_delete',
+                ],
+            ],
         ];
 
         $permissionModels = collect();

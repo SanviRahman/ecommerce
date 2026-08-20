@@ -383,6 +383,13 @@ return [
             'can'    => 'review_manage',
             'active' => ['admin/reviews*'],
         ],
+        [
+            'text'   => 'Contact Messages',
+            'route'  => 'admin.contact-messages.index',
+            'icon'   => 'fas fa-fw fa-envelope',
+            'can'    => 'contact_message_manage',
+            'active' => ['admin/contact-messages*'],
+        ],
 
         [
             'header' => 'SETTINGS',

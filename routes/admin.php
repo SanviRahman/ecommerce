@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FooterLinkController;
 use App\Http\Controllers\Admin\FooterSettingController;
@@ -165,6 +166,7 @@ Route::middleware('admin')->group(function () {
         Route::resource('/', ProductController::class)->parameters(['' => 'product']);
     });
 
+    // Meta pixel
     Route::group(['prefix' => 'meta-pixel-scripts', 'as' => 'meta-pixel-scripts.'], function () {
         Route::post('multiple-action', [MetaPixelScriptController::class, 'multipleAction'])->name('multiple_action');
         Route::post('sort', [MetaPixelScriptController::class, 'sort'])->name('sort');
@@ -174,6 +176,17 @@ Route::middleware('admin')->group(function () {
         Route::get('list', [MetaPixelScriptController::class, 'list'])->name('list');
         Route::get('ajax-search', [MetaPixelScriptController::class, 'list'])->name('ajax_search');
         Route::resource('/', MetaPixelScriptController::class)->parameters(['' => 'meta_pixel_script']);
+    });
+
+    //Contact Messasge
+    Route::group(['prefix' => 'contact-messages', 'as' => 'contact-messages.'], function () {
+        Route::post('multiple-action', [ContactMessageController::class, 'multipleAction'])->name('multiple_action');
+        Route::get('trash', [ContactMessageController::class, 'trash'])->name('trashed');
+        Route::post('restore/{contact_message}', [ContactMessageController::class, 'restore'])->name('restore');
+        Route::delete('force-delete/{contact_message}', [ContactMessageController::class, 'forceDelete'])->name('force_delete');
+        Route::get('list', [ContactMessageController::class, 'list'])->name('list');
+        Route::get('ajax-search', [ContactMessageController::class, 'list'])->name('ajax_search');
+        Route::resource('/', ContactMessageController::class)->parameters(['' => 'contact_message']);
     });
 
 });
