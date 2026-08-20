@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Frontend\HomeController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -9,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', fn () => redirect()->route('login'))->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 /*
 |--------------------------------------------------------------------------
@@ -20,30 +21,11 @@ Route::get('/', fn () => redirect()->route('login'))->name('home');
 Route::prefix('admin')
     ->middleware('lte_context:admin')
     ->group(function () {
-
-        /*
-        |--------------------------------------------------------------------------
-        | Admin Authentication
-        |--------------------------------------------------------------------------
-        */
-
         Auth::routes([
             'register' => false,
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | System Command Routes
-        |--------------------------------------------------------------------------
-        */
-
         require __DIR__.'/command.php';
-
-        /*
-        |--------------------------------------------------------------------------
-        | Admin Panel Routes
-        |--------------------------------------------------------------------------
-        */
 
         Route::name('admin.')->group(function () {
             require __DIR__.'/admin.php';

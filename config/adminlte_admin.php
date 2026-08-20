@@ -343,11 +343,36 @@ return [
         ],
 
         [
-            'text'   => 'Home Section Photos',
-            'route'  => 'admin.home-section-photos.index',
-            'icon'   => 'fas fa-fw fa-images',
-            'can'    => 'home_section_photo_manage',
-            'active' => ['admin/home-section-photos*'],
+            'header' => 'CMS',
+        ],
+
+        [
+            'text'    => 'CMS Management',
+            'icon'    => 'fas fa-fw fa-layer-group',
+            'submenu' => [
+                [
+                    'text'   => 'Reviews',
+                    'route'  => 'admin.reviews.index',
+                    'icon'   => 'fas fa-fw fa-star',
+                    'can'    => 'review_manage',
+                    'active' => ['admin/reviews*'],
+                ],
+                [
+                    'text'   => 'Contact Messages',
+                    'route'  => 'admin.contact-messages.index',
+                    'icon'   => 'fas fa-fw fa-envelope',
+                    'can'    => 'contact_message_manage',
+                    'active' => ['admin/contact-messages*'],
+                ],
+                // চাইলে হোম সেকশন ফটোস (Home Section Photos) ও এখানে যুক্ত করতে পারেন:
+                [
+                    'text'   => 'Home Section Photos',
+                    'route'  => 'admin.home-section-photos.index',
+                    'icon'   => 'fas fa-fw fa-images',
+                    'can'    => 'home_section_photo_manage',
+                    'active' => ['admin/home-section-photos*'],
+                ],
+            ],
         ],
 
         [
@@ -374,21 +399,6 @@ return [
                 ],
 
             ],
-        ],
-
-        [
-            'text'   => 'Reviews',
-            'route'  => 'admin.reviews.index',
-            'icon'   => 'fas fa-fw fa-star',
-            'can'    => 'review_manage',
-            'active' => ['admin/reviews*'],
-        ],
-        [
-            'text'   => 'Contact Messages',
-            'route'  => 'admin.contact-messages.index',
-            'icon'   => 'fas fa-fw fa-envelope',
-            'can'    => 'contact_message_manage',
-            'active' => ['admin/contact-messages*'],
         ],
 
         [
