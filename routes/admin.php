@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\FooterSettingController;
 use App\Http\Controllers\Admin\HeaderMenuItemController;
 use App\Http\Controllers\Admin\HeaderSettingController;
 use App\Http\Controllers\Admin\HomeSectionPhotoController;
+use App\Http\Controllers\Admin\MetaPixelScriptController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProfileController;
@@ -162,6 +163,17 @@ Route::middleware('admin')->group(function () {
         Route::get('list', [ProductController::class, 'list'])->name('list');
         Route::get('ajax-search', [ProductController::class, 'list'])->name('ajax_search');
         Route::resource('/', ProductController::class)->parameters(['' => 'product']);
+    });
+
+    Route::group(['prefix' => 'meta-pixel-scripts', 'as' => 'meta-pixel-scripts.'], function () {
+        Route::post('multiple-action', [MetaPixelScriptController::class, 'multipleAction'])->name('multiple_action');
+        Route::post('sort', [MetaPixelScriptController::class, 'sort'])->name('sort');
+        Route::get('trash', [MetaPixelScriptController::class, 'trash'])->name('trashed');
+        Route::post('restore/{meta_pixel_script}', [MetaPixelScriptController::class, 'restore'])->name('restore');
+        Route::delete('force-delete/{meta_pixel_script}', [MetaPixelScriptController::class, 'forceDelete'])->name('force_delete');
+        Route::get('list', [MetaPixelScriptController::class, 'list'])->name('list');
+        Route::get('ajax-search', [MetaPixelScriptController::class, 'list'])->name('ajax_search');
+        Route::resource('/', MetaPixelScriptController::class)->parameters(['' => 'meta_pixel_script']);
     });
 
 });

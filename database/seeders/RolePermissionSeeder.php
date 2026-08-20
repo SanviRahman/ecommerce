@@ -188,6 +188,21 @@ class RolePermissionSeeder extends Seeder
                 ],
             ],
             [
+                'group_name'  => 'Meta Pixel Scripts',
+                'guard_name'  => 'admin',
+                'permissions' => [
+                    'meta_pixel_script_manage',
+                    'meta_pixel_script_list',
+                    'meta_pixel_script_view',
+                    'meta_pixel_script_create',
+                    'meta_pixel_script_update',
+                    'meta_pixel_script_delete',
+                    'meta_pixel_script_trash',
+                    'meta_pixel_script_restore',
+                    'meta_pixel_script_force_delete',
+                ],
+            ],
+            [
                 'group_name'  => 'Roles',
                 'guard_name'  => 'admin',
                 'permissions' => [

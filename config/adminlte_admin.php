@@ -427,6 +427,14 @@ return [
                     'can'    => 'footer_link_manage',
                     'active' => ['admin/footer-links*'],
                 ],
+
+                [
+                    'text'   => 'Meta Pixel Scripts',
+                    'route'  => 'admin.meta-pixel-scripts.index',
+                    'icon'   => 'fas fa-fw fa-code',
+                    'can'    => 'meta_pixel_script_manage',
+                    'active' => ['admin/meta-pixel-scripts*'],
+                ],
             ],
         ],
         /*
