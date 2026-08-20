@@ -7,9 +7,11 @@ use App\Http\Controllers\Admin\FooterLinkController;
 use App\Http\Controllers\Admin\FooterSettingController;
 use App\Http\Controllers\Admin\HeaderMenuItemController;
 use App\Http\Controllers\Admin\HeaderSettingController;
+use App\Http\Controllers\Admin\HomeSectionPhotoController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use Illuminate\Support\Facades\Route;
@@ -68,6 +70,30 @@ Route::middleware('admin')->group(function () {
         Route::get('list', [SiteSettingController::class, 'list'])->name('list');
         Route::get('ajax-search', [SiteSettingController::class, 'list'])->name('ajax_search');
         Route::resource('/', SiteSettingController::class)->parameters(['' => 'site_setting']);
+    });
+
+    // Home Section Photos
+    Route::group(['prefix' => 'home-section-photos', 'as' => 'home-section-photos.'], function () {
+        Route::post('multiple-action', [HomeSectionPhotoController::class, 'multipleAction'])->name('multiple_action');
+        Route::post('sort', [HomeSectionPhotoController::class, 'sort'])->name('sort');
+        Route::get('trash', [HomeSectionPhotoController::class, 'trash'])->name('trashed');
+        Route::post('restore/{home_section_photo}', [HomeSectionPhotoController::class, 'restore'])->name('restore');
+        Route::delete('force-delete/{home_section_photo}', [HomeSectionPhotoController::class, 'forceDelete'])->name('force_delete');
+        Route::get('list', [HomeSectionPhotoController::class, 'list'])->name('list');
+        Route::get('ajax-search', [HomeSectionPhotoController::class, 'list'])->name('ajax_search');
+        Route::resource('/', HomeSectionPhotoController::class)->parameters(['' => 'home_section_photo']);
+    });
+
+    // Reviews
+    Route::group(['prefix' => 'reviews', 'as' => 'reviews.'], function () {
+        Route::post('multiple-action', [ReviewController::class, 'multipleAction'])->name('multiple_action');
+        Route::post('sort', [ReviewController::class, 'sort'])->name('sort');
+        Route::get('trash', [ReviewController::class, 'trash'])->name('trashed');
+        Route::post('restore/{review}', [ReviewController::class, 'restore'])->name('restore');
+        Route::delete('force-delete/{review}', [ReviewController::class, 'forceDelete'])->name('force_delete');
+        Route::get('list', [ReviewController::class, 'list'])->name('list');
+        Route::get('ajax-search', [ReviewController::class, 'list'])->name('ajax_search');
+        Route::resource('/', ReviewController::class)->parameters(['' => 'review']);
     });
 
     // Header Settings

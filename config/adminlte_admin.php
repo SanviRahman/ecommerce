@@ -343,6 +343,14 @@ return [
         ],
 
         [
+            'text'   => 'Home Section Photos',
+            'route'  => 'admin.home-section-photos.index',
+            'icon'   => 'fas fa-fw fa-images',
+            'can'    => 'home_section_photo_manage',
+            'active' => ['admin/home-section-photos*'],
+        ],
+
+        [
             'header' => 'ECOMMERCE',
         ],
 
@@ -366,6 +374,14 @@ return [
                 ],
 
             ],
+        ],
+
+        [
+            'text'   => 'Reviews',
+            'route'  => 'admin.reviews.index',
+            'icon'   => 'fas fa-fw fa-star',
+            'can'    => 'review_manage',
+            'active' => ['admin/reviews*'],
         ],
 
         [

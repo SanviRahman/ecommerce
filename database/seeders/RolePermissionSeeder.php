@@ -158,6 +158,36 @@ class RolePermissionSeeder extends Seeder
                 ],
             ],
             [
+                'group_name'  => 'Home Section Photos',
+                'guard_name'  => 'admin',
+                'permissions' => [
+                    'home_section_photo_manage',
+                    'home_section_photo_list',
+                    'home_section_photo_view',
+                    'home_section_photo_create',
+                    'home_section_photo_update',
+                    'home_section_photo_delete',
+                    'home_section_photo_trash',
+                    'home_section_photo_restore',
+                    'home_section_photo_force_delete',
+                ],
+            ],
+            [
+                'group_name'  => 'Reviews',
+                'guard_name'  => 'admin',
+                'permissions' => [
+                    'review_manage',
+                    'review_list',
+                    'review_view',
+                    'review_create',
+                    'review_update',
+                    'review_delete',
+                    'review_trash',
+                    'review_restore',
+                    'review_force_delete',
+                ],
+            ],
+            [
                 'group_name'  => 'Roles',
                 'guard_name'  => 'admin',
                 'permissions' => [
