@@ -473,17 +473,6 @@
     border-top: 3px solid var(--front-navy);
 }
 
-.about-page .testimonial-section::after {
-    content: '';
-    position: absolute;
-    right: -54px;
-    bottom: -28px;
-    width: 150px;
-    height: 120px;
-    background: url('{{ asset('frontend/images/about/testimonial-marble.png') }}') center/contain no-repeat;
-    transform: rotate(-10deg);
-    pointer-events: none;
-}
 
 .about-page .testimonial-section .section-heading-row {
     padding-bottom: 29px;
@@ -691,7 +680,6 @@
     .about-page #testimonialCarousel .carousel-item,
     .about-page #testimonialCarousel .testimonial-card { height: 390px; }
     .about-page #testimonialCarousel .testimonial-card { padding: 48px 38px; }
-    .about-page .testimonial-section::after { width: 105px; height: 90px; right: -40px; }
 }
 </style>
 @endpush
