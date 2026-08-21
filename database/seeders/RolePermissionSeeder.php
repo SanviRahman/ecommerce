@@ -304,7 +304,7 @@ class RolePermissionSeeder extends Seeder
             ['label' => 'Services', 'route_name' => 'services.index', 'sort_order' => 2, 'status' => true],
             ['label' => 'About', 'route_name' => 'about.index', 'sort_order' => 3, 'status' => true],
             ['label' => 'Products', 'route_name' => 'products.index', 'sort_order' => 4, 'status' => true],
-            ['label' => 'Contact Us', 'route_name' => 'contact.index', 'sort_order' => 5, 'status`' => true],
+            ['label' => 'Contact Us', 'route_name' => 'contact.index', 'sort_order' => 5, 'status' => true],
         ];
 
         foreach ($defaultMenuItems as $item) {
