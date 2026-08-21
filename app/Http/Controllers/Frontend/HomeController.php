@@ -36,7 +36,7 @@ class HomeController extends Controller
             ->limit(10)
             ->get();
 
-        return view('frontend.pages.home', compact(
+        return view('frontend.pages.home.home', compact(
             'products',
             'offerGalleryPhotos',
             'reviews'

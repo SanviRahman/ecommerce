@@ -99,8 +99,33 @@
     };
 
     enableCarouselDrag('#productShowcaseCarousel');
+    enableCarouselDrag('#productShowcaseMobileCarousel');
     enableCarouselDrag('#offerGalleryCarousel');
     enableCarouselDrag('#testimonialCarousel');
+
+    const mobileProductCarousel = $('#productShowcaseMobileCarousel');
+
+    if (mobileProductCarousel.length) {
+        mobileProductCarousel.carousel({
+            interval: 3200,
+            pause: false,
+            wrap: true,
+            keyboard: true,
+            touch: true
+        });
+
+        mobileProductCarousel.carousel('cycle');
+
+        mobileProductCarousel.on('slid.bs.carousel', function() {
+            mobileProductCarousel.carousel('cycle');
+        });
+
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                mobileProductCarousel.carousel('cycle');
+            }
+        });
+    }
 
     const testimonialCarousel = $('#testimonialCarousel');
 
