@@ -12,7 +12,12 @@
         data-product-category="{{ $product->category?->slug }}"
         style="transition-delay: {{ $delayIndex * 55 }}ms"
     >
-        <div class="product-grid-media">
+        <a
+            class="product-grid-link"
+            href="{{ route('products.show', ['product' => $product->slug]) }}"
+            aria-label="View {{ $product->name }}"
+        >
+            <div class="product-grid-media">
             <img
                 src="{{ $productImage }}"
                 alt="{{ $product->name }}"
@@ -30,6 +35,7 @@
                 </div>
             </div>
         </div>
+        </a>
     </article>
 @empty
 @endforelse

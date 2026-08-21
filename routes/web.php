@@ -19,6 +19,7 @@ Route::get('/about-us', [AboutController::class, 'index'])->name('about.index');
 Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/load-more', [ProductController::class, 'loadMore'])->middleware('throttle:60,1')->name('products.load-more');
+Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/contact-us', [ContactController::class, 'index'])->name('contact.index');
 Route::post('/contact-us', [ContactController::class, 'store'])->middleware('throttle:6,1')->name('contact.store');
 

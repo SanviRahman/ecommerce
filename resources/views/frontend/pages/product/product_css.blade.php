@@ -226,6 +226,19 @@
     pointer-events: none;
 }
 
+.product-grid-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    color: inherit;
+    text-decoration: none !important;
+}
+
+.product-grid-link:hover {
+    color: inherit;
+    text-decoration: none !important;
+}
+
 .product-grid-card {
     position: relative;
     min-width: 0;

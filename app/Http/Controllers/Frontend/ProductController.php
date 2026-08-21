@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\SiteSetting;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -33,6 +35,8 @@ class ProductController extends Controller
             ->limit(self::PRODUCTS_PER_BATCH)
             ->get();
 
+        $siteSetting = SiteSetting::current()->loadMissing('media');
+
         return view('frontend.pages.product.product', [
             'categories' => $categories,
             'products' => $products,
@@ -40,7 +44,66 @@ class ProductController extends Controller
             'totalProducts' => $totalProducts,
             'productsPerBatch' => self::PRODUCTS_PER_BATCH,
             'hasMoreProducts' => $products->count() < $totalProducts,
+            'siteSetting' => $siteSetting,
         ]);
+    }
+
+    public function show(string $product): View
+    {
+        $product = Product::query()
+            ->with(['category', 'media'])
+            ->where('slug', $product)
+            ->where('status', true)
+            ->whereHas('category', function (Builder $query) {
+                $query->where('status', true);
+            })
+            ->firstOrFail();
+
+        $relatedProducts = Product::query()
+            ->with(['category', 'media'])
+            ->where('status', true)
+            ->whereKeyNot($product->getKey())
+            ->where('category_id', $product->category_id)
+            ->whereHas('category', function (Builder $query) {
+                $query->where('status', true);
+            })
+            ->orderByDesc('is_featured')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->limit(12)
+            ->get();
+
+        if ($relatedProducts->count() < 3) {
+            $excludeIds = $relatedProducts
+                ->pluck('id')
+                ->push($product->getKey())
+                ->all();
+
+            $fallbackProducts = Product::query()
+                ->with(['category', 'media'])
+                ->where('status', true)
+                ->whereNotIn('id', $excludeIds)
+                ->whereHas('category', function (Builder $query) {
+                    $query->where('status', true);
+                })
+                ->orderByDesc('is_featured')
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->limit(12 - $relatedProducts->count())
+                ->get();
+
+            $relatedProducts = $relatedProducts
+                ->concat($fallbackProducts)
+                ->values();
+        }
+
+        $siteSetting = SiteSetting::current()->loadMissing('media');
+
+        return view('frontend.pages.product.product_detail', compact(
+            'product',
+            'relatedProducts',
+            'siteSetting'
+        ));
     }
 
     public function loadMore(Request $request): JsonResponse
@@ -91,7 +154,7 @@ class ProductController extends Controller
         ]);
     }
 
-    private function activeCategories()
+    private function activeCategories(): Collection
     {
         $activeProductCategoryIds = Product::query()
             ->where('status', true)
@@ -110,10 +173,7 @@ class ProductController extends Controller
     private function productQuery(?string $categorySlug = null): Builder
     {
         return Product::query()
-            ->with([
-                'category',
-                'media',
-            ])
+            ->with(['category', 'media'])
             ->where('status', true)
             ->whereHas('category', function (Builder $query) {
                 $query->where('status', true);

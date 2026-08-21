@@ -41,6 +41,9 @@ class AppServiceProvider extends ServiceProvider
 
             $footerProducts = Product::query()
                 ->where('status', true)
+                ->whereHas('category', function ($query) {
+                    $query->where('status', true);
+                })
                 ->orderByDesc('is_featured')
                 ->orderBy('sort_order')
                 ->orderBy('id')

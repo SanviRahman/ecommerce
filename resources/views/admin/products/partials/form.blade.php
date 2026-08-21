@@ -208,16 +208,26 @@
         $(this).closest('.spec-row').remove();
     });
 
-    // Compile specifications before submit
+    // Compile specification rows into Laravel's specifications[key] array.
     $('#ajax-form').on('submit', function() {
-        let specs = {};
+        const form = $(this);
+
+        form.find('.compiled-specification-input').remove();
+
         $('.spec-row').each(function() {
-            let k = $(this).find('.spec-key').val().trim();
-            let v = $(this).find('.spec-val').val().trim();
-            if (k) {
-                specs[k] = v;
+            const key = $(this).find('.spec-key').val().trim();
+            const value = $(this).find('.spec-val').val().trim();
+
+            if (!key) {
+                return;
             }
+
+            $('<input>', {
+                type: 'hidden',
+                class: 'compiled-specification-input',
+                name: `specifications[${key}]`,
+                value: value
+            }).appendTo(form);
         });
-        // We can append fields dynamically or let controller handle specs array. Alternatively, we can create individual input names like specifications[key]=value.
     });
 </script>
