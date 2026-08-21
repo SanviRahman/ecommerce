@@ -16,7 +16,8 @@
 
             const usesHeroHeader =
                 document.body.classList.contains('about-page') ||
-                document.body.classList.contains('contact-page');
+                document.body.classList.contains('contact-page') ||
+                document.body.classList.contains('service-page');
 
             const scrollThreshold = usesHeroHeader ? 220 : 20;
 

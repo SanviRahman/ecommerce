@@ -1,6 +1,6 @@
 @php
     $currentRoute = request()->route()?->getName();
-    $useHeroTopbar = request()->routeIs('about.index', 'contact.index');
+    $useHeroTopbar = request()->routeIs('about.index', 'contact.index', 'services.index');
 @endphp
 
 @if($headerSetting->topbar_enabled)
