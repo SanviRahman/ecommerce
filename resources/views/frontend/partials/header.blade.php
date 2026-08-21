@@ -1,29 +1,74 @@
 @php
     $currentRoute = request()->route()?->getName();
+    $useHeroTopbar = request()->routeIs('about.index', 'contact.index');
 @endphp
 
 @if($headerSetting->topbar_enabled)
     <div class="front-topbar">
         <div class="front-container">
-            <div>
-                {{ $headerSetting->topbar_text }}
-            </div>
 
-            <div class="front-topbar-contact">
-                @if($headerSetting->show_phone && $siteSetting->contact_phone)
-                    <a href="tel:{{ preg_replace('/\s+/', '', $siteSetting->contact_phone) }}">
-                        <i class="fas fa-phone-alt mr-1"></i>
-                        {{ $siteSetting->contact_phone }}
-                    </a>
-                @endif
+            @if($useHeroTopbar)
+                {{-- Hero pages: phone/email left, business hours + WhatsApp right --}}
+                <div class="front-topbar-contact">
+                    @if($headerSetting->show_phone && $siteSetting->contact_phone)
+                        <a href="tel:{{ preg_replace('/\s+/', '', $siteSetting->contact_phone) }}">
+                            <i class="fas fa-phone-alt mr-1"></i>
+                            {{ $siteSetting->contact_phone }}
+                        </a>
+                    @endif
 
-                @if($headerSetting->show_email && $siteSetting->contact_email)
-                    <a href="mailto:{{ $siteSetting->contact_email }}">
-                        <i class="far fa-envelope mr-1"></i>
-                        {{ $siteSetting->contact_email }}
-                    </a>
-                @endif
-            </div>
+                    @if($headerSetting->show_email && $siteSetting->contact_email)
+                        <a href="mailto:{{ $siteSetting->contact_email }}">
+                            <i class="far fa-envelope mr-1"></i>
+                            {{ $siteSetting->contact_email }}
+                        </a>
+                    @endif
+                </div>
+
+                <div class="front-topbar-meta">
+                    @if($siteSetting->business_hours)
+                        <span class="front-business-hours">
+                            <i class="far fa-clock mr-1"></i>
+                            {{ $siteSetting->business_hours }}
+                        </span>
+                    @endif
+
+                    @if($siteSetting->whatsapp_url)
+                        <a
+                            class="front-instagram-icon front-whatsapp-icon"
+                            href="{{ $siteSetting->whatsapp_url }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="WhatsApp"
+                            title="WhatsApp"
+                        >
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    @endif
+                </div>
+            @else
+                {{-- Other pages: preserve existing topbar UI/functionality --}}
+                <div>
+                    {{ $headerSetting->topbar_text }}
+                </div>
+
+                <div class="front-topbar-contact">
+                    @if($headerSetting->show_phone && $siteSetting->contact_phone)
+                        <a href="tel:{{ preg_replace('/\s+/', '', $siteSetting->contact_phone) }}">
+                            <i class="fas fa-phone-alt mr-1"></i>
+                            {{ $siteSetting->contact_phone }}
+                        </a>
+                    @endif
+
+                    @if($headerSetting->show_email && $siteSetting->contact_email)
+                        <a href="mailto:{{ $siteSetting->contact_email }}">
+                            <i class="far fa-envelope mr-1"></i>
+                            {{ $siteSetting->contact_email }}
+                        </a>
+                    @endif
+                </div>
+            @endif
+
         </div>
     </div>
 @endif
