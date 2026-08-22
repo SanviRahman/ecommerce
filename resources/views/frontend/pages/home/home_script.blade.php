@@ -103,29 +103,42 @@
     enableCarouselDrag('#offerGalleryCarousel');
     enableCarouselDrag('#testimonialCarousel');
 
-    const mobileProductCarousel = $('#productShowcaseMobileCarousel');
+    /*
+     * Stable product autoplay.
+     *
+     * Bootstrap already owns the slide transition. We initialize each
+     * product carousel once and do NOT restart cycle() after every slide,
+     * because repeated interval resets can create a visible hitch/jump.
+     */
+    const setupProductCarousel = function(selector, interval) {
+        const carousel = $(selector);
 
-    if (mobileProductCarousel.length) {
-        mobileProductCarousel.carousel({
-            interval: 3200,
+        if (!carousel.length) {
+            return;
+        }
+
+        carousel.carousel({
+            interval: interval,
             pause: false,
             wrap: true,
             keyboard: true,
             touch: true
         });
 
-        mobileProductCarousel.carousel('cycle');
-
-        mobileProductCarousel.on('slid.bs.carousel', function() {
-            mobileProductCarousel.carousel('cycle');
-        });
+        carousel.carousel('cycle');
 
         document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-                mobileProductCarousel.carousel('cycle');
+            if (document.hidden) {
+                carousel.carousel('pause');
+                return;
             }
+
+            carousel.carousel('cycle');
         });
-    }
+    };
+
+    setupProductCarousel('#productShowcaseCarousel', 5000);
+    setupProductCarousel('#productShowcaseMobileCarousel', 3200);
 
     const testimonialCarousel = $('#testimonialCarousel');
 
@@ -148,9 +161,13 @@
     }
 
     // Restart CSS entrance animations whenever a Bootstrap carousel changes slide.
+    /*
+     * Product carousel intentionally excluded here.
+     * Forcing offsetWidth on every product slide causes layout reflow
+     * and is one of the sources of the visible jump.
+     */
     [
         '#homeHeroCarousel',
-        '#productShowcaseCarousel',
         '#offerGalleryCarousel',
         '#tmcCarousel'
     ].forEach(function(selector) {

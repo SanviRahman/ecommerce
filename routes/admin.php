@@ -74,18 +74,6 @@ Route::middleware('admin')->group(function () {
         Route::resource('/', SiteSettingController::class)->parameters(['' => 'site_setting']);
     });
 
-    // Home Section Photos
-    Route::group(['prefix' => 'home-section-photos', 'as' => 'home-section-photos.'], function () {
-        Route::post('multiple-action', [HomeSectionPhotoController::class, 'multipleAction'])->name('multiple_action');
-        Route::post('sort', [HomeSectionPhotoController::class, 'sort'])->name('sort');
-        Route::get('trash', [HomeSectionPhotoController::class, 'trash'])->name('trashed');
-        Route::post('restore/{home_section_photo}', [HomeSectionPhotoController::class, 'restore'])->name('restore');
-        Route::delete('force-delete/{home_section_photo}', [HomeSectionPhotoController::class, 'forceDelete'])->name('force_delete');
-        Route::get('list', [HomeSectionPhotoController::class, 'list'])->name('list');
-        Route::get('ajax-search', [HomeSectionPhotoController::class, 'list'])->name('ajax_search');
-        Route::resource('/', HomeSectionPhotoController::class)->parameters(['' => 'home_section_photo']);
-    });
-
     // Reviews
     Route::group(['prefix' => 'reviews', 'as' => 'reviews.'], function () {
         Route::post('multiple-action', [ReviewController::class, 'multipleAction'])->name('multiple_action');

@@ -364,14 +364,6 @@ return [
                     'can'    => 'contact_message_manage',
                     'active' => ['admin/contact-messages*'],
                 ],
-                // চাইলে হোম সেকশন ফটোস (Home Section Photos) ও এখানে যুক্ত করতে পারেন:
-                [
-                    'text'   => 'Home Section Photos',
-                    'route'  => 'admin.home-section-photos.index',
-                    'icon'   => 'fas fa-fw fa-images',
-                    'can'    => 'home_section_photo_manage',
-                    'active' => ['admin/home-section-photos*'],
-                ],
             ],
         ],
 

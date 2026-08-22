@@ -4,30 +4,32 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SiteSetting;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class SiteSettingController extends Controller
 {
+    private const MEDIA_COLLECTIONS = ['logo', 'favicon'];
+
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request): View|JsonResponse
     {
         $this->authorizeSettings('list');
 
-        $query = SiteSetting::query();
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('site_name', 'like', "%{$search}%")
+        $siteSettings = SiteSetting::query()
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $search = $request->search;
+                $q->where(fn($sub) => $sub->where('site_name', 'like', "%{$search}%")
                     ->orWhere('contact_email', 'like', "%{$search}%")
-                    ->orWhere('contact_phone', 'like', "%{$search}%");
-            });
-        }
-
-        $siteSettings = $query->latest()->paginate(15);
+                    ->orWhere('contact_phone', 'like', "%{$search}%"));
+            })
+            ->latest()
+            ->paginate(15);
 
         if ($request->ajax()) {
             return response()->json([
@@ -35,130 +37,118 @@ class SiteSettingController extends Controller
             ]);
         }
 
-        $title = 'Site Settings Management';
-        $breadcrumb = [['text' => 'Site Settings', 'url' => route('admin.site-settings.index')]];
-
-        return view('admin.site-settings.index', compact('siteSettings', 'title', 'breadcrumb'));
+        return view('admin.site-settings.index', [
+            'siteSettings' => $siteSettings,
+            'title'        => 'Site Settings Management',
+            'breadcrumb'   => [['text' => 'Site Settings', 'url' => route('admin.site-settings.index')]],
+        ]);
     }
 
     /**
      * JSON list for AJAX requests.
      */
-    public function list(Request $request)
+    public function list(Request $request): JsonResponse
     {
         $this->authorizeSettings('list');
 
-        $query = SiteSetting::query();
+        $settings = SiteSetting::query()
+            ->when($request->filled('search'), fn($q) => $q->where('site_name', 'like', "%{$request->search}%")
+                ->orWhere('contact_email', 'like', "%{$request->search}%"))
+            ->select('id', 'site_name', 'contact_email', 'contact_phone')
+            ->latest()
+            ->get();
 
-        if ($request->filled('search')) {
-            $query->where('site_name', 'like', "%{$request->search}%")
-                ->orWhere('contact_email', 'like', "%{$request->search}%");
-        }
-
-        $settings = $query->select('id', 'site_name', 'contact_email', 'contact_phone')->latest()->get();
-        return response()->json(['success' => true, 'data' => $settings]);
+        return response()->json([
+            'success' => true,
+            'data'    => $settings,
+        ]);
     }
 
     /**
      * Show form for create (AJAX).
      */
-    public function create(Request $request)
+    public function create(Request $request): JsonResponse
     {
         $this->authorizeSettings('create');
 
-        if ($request->ajax()) {
-            return response()->json([
-                'html' => view('admin.site-settings.partials.form')->render()
-            ]);
-        }
-        abort(404);
+        return $this->renderAjaxModal('admin.site-settings.partials.form');
     }
 
     /**
      * Store new resource.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $this->authorizeSettings('create');
 
         $validated = $this->validateRequest($request);
+        $siteSetting = SiteSetting::create(Arr::except($validated, ['logo', 'favicon', 'remove_logo', 'remove_favicon']));
 
-        $data = $validated;
-        unset($data['logo'], $data['favicon'], $data['remove_logo'], $data['remove_favicon']);
+        $this->syncAllMedia($request, $siteSetting);
 
-        $siteSetting = SiteSetting::create($data);
-
-        $this->syncMedia($request, $siteSetting, 'logo');
-        $this->syncMedia($request, $siteSetting, 'favicon');
-
-        return response()->json(['success' => true, 'message' => 'Site setting record created successfully.']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Site setting record created successfully.',
+        ]);
     }
 
     /**
      * Show details (AJAX).
      */
-    public function show(Request $request, SiteSetting $siteSetting)
+    public function show(Request $request, SiteSetting $siteSetting): JsonResponse
     {
         $this->authorizeSettings('view');
 
-        if ($request->ajax()) {
-            return response()->json([
-                'html' => view('admin.site-settings.partials.show', compact('siteSetting'))->render()
-            ]);
-        }
-        abort(404);
+        return $this->renderAjaxModal('admin.site-settings.partials.show', compact('siteSetting'));
     }
 
     /**
      * Edit form (AJAX).
      */
-    public function edit(Request $request, SiteSetting $siteSetting)
+    public function edit(Request $request, SiteSetting $siteSetting): JsonResponse
     {
         $this->authorizeSettings('update');
 
-        if ($request->ajax()) {
-            return response()->json([
-                'html' => view('admin.site-settings.partials.form', compact('siteSetting'))->render()
-            ]);
-        }
-        abort(404);
+        return $this->renderAjaxModal('admin.site-settings.partials.form', compact('siteSetting'));
     }
 
     /**
      * Update resource.
      */
-    public function update(Request $request, SiteSetting $siteSetting)
+    public function update(Request $request, SiteSetting $siteSetting): JsonResponse
     {
         $this->authorizeSettings('update');
 
         $validated = $this->validateRequest($request);
+        $siteSetting->update(Arr::except($validated, ['logo', 'favicon', 'remove_logo', 'remove_favicon']));
 
-        $data = $validated;
-        unset($data['logo'], $data['favicon'], $data['remove_logo'], $data['remove_favicon']);
+        $this->syncAllMedia($request, $siteSetting);
 
-        $siteSetting->update($data);
-
-        $this->syncMedia($request, $siteSetting, 'logo');
-        $this->syncMedia($request, $siteSetting, 'favicon');
-
-        return response()->json(['success' => true, 'message' => 'Site settings updated successfully.']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Site settings updated successfully.',
+        ]);
     }
 
     /**
      * Soft delete.
      */
-    public function destroy(Request $request, SiteSetting $siteSetting)
+    public function destroy(Request $request, SiteSetting $siteSetting): JsonResponse
     {
         $this->authorizeSettings('delete');
 
         $siteSetting->delete();
-        return response()->json(['success' => true, 'message' => 'Site setting moved to trash.']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Site setting moved to trash.',
+        ]);
     }
 
     /**
      * Bulk actions.
      */
-    public function multipleAction(Request $request)
+    public function multipleAction(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'action' => ['required', 'in:delete,restore,force_delete'],
@@ -166,38 +156,25 @@ class SiteSettingController extends Controller
             'ids.*'  => ['integer'],
         ]);
 
-        if ($validated['action'] === 'restore') {
-            $this->authorizeSettings('restore');
-        } elseif ($validated['action'] === 'force_delete') {
-            $this->authorizeSettings('force_delete');
-        } else {
-            $this->authorizeSettings('delete');
-        }
+        $action = $validated['action'];
+        $ids    = $validated['ids'];
 
-        $ids = $validated['ids'];
-        $msg = '';
+        $this->authorizeSettings(match ($action) {
+            'restore'      => 'restore',
+            'force_delete' => 'force_delete',
+            default        => 'delete',
+        });
 
-        switch ($validated['action']) {
-            case 'delete':
-                SiteSetting::whereIn('id', $ids)->delete();
-                $msg = 'Selected settings moved to trash.';
-                break;
-
-            case 'restore':
-                SiteSetting::onlyTrashed()->whereIn('id', $ids)->restore();
-                $msg = 'Selected settings restored.';
-                break;
-
-            case 'force_delete':
-                $items = SiteSetting::onlyTrashed()->whereIn('id', $ids)->get();
-                foreach ($items as $item) {
-                    $item->clearMediaCollection('logo');
-                    $item->clearMediaCollection('favicon');
+        $msg = match ($action) {
+            'delete' => tap('Selected settings moved to trash.', fn() => SiteSetting::whereIn('id', $ids)->delete()),
+            'restore' => tap('Selected settings restored.', fn() => SiteSetting::onlyTrashed()->whereIn('id', $ids)->restore()),
+            'force_delete' => tap('Selected settings permanently deleted.', function () use ($ids) {
+                SiteSetting::onlyTrashed()->whereIn('id', $ids)->get()->each(function (SiteSetting $item) {
+                    $this->clearAllMedia($item);
                     $item->forceDelete();
-                }
-                $msg = 'Selected settings permanently deleted.';
-                break;
-        }
+                });
+            }),
+        };
 
         return response()->json(['success' => true, 'message' => $msg]);
     }
@@ -205,65 +182,74 @@ class SiteSettingController extends Controller
     /**
      * Trash view.
      */
-    public function trash(Request $request)
+    public function trash(Request $request): View|JsonResponse
     {
         $this->authorizeSettings('trash');
 
-        $query = SiteSetting::onlyTrashed()->orderBy('deleted_at', 'desc');
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('site_name', 'like', "%{$search}%")
-                    ->orWhere('contact_email', 'like', "%{$search}%");
-            });
-        }
-
-        $siteSettings = $query->paginate(15);
+        $siteSettings = SiteSetting::onlyTrashed()
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $search = $request->search;
+                $q->where(fn($sub) => $sub->where('site_name', 'like', "%{$search}%")
+                    ->orWhere('contact_email', 'like', "%{$search}%"));
+            })
+            ->latest('deleted_at')
+            ->paginate(15);
 
         if ($request->ajax()) {
             return response()->json([
-                'html' => view('admin.site-settings.partials.table', ['siteSettings' => $siteSettings, 'isTrash' => true])->render()
+                'html' => view('admin.site-settings.partials.table', [
+                    'siteSettings' => $siteSettings,
+                    'isTrash'      => true,
+                ])->render(),
             ]);
         }
 
-        $title = 'Trashed Site Settings';
-        $breadcrumb = [['text' => 'Trashed Site Settings', 'url' => route('admin.site-settings.trashed')]];
-
-        return view('admin.site-settings.trash', compact('siteSettings', 'title', 'breadcrumb'));
+        return view('admin.site-settings.trash', [
+            'siteSettings' => $siteSettings,
+            'title'        => 'Trashed Site Settings',
+            'breadcrumb'   => [['text' => 'Trashed Site Settings', 'url' => route('admin.site-settings.trashed')]],
+        ]);
     }
 
     /**
      * Restore single.
      */
-    public function restore(Request $request, int $id)
+    public function restore(Request $request, int $id): JsonResponse
     {
         $this->authorizeSettings('restore');
 
         SiteSetting::onlyTrashed()->findOrFail($id)->restore();
-        return response()->json(['success' => true, 'message' => 'Site setting restored successfully.']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Site setting restored successfully.',
+        ]);
     }
 
     /**
      * Force delete single.
      */
-    public function forceDelete(Request $request, int $id)
+    public function forceDelete(Request $request, int $id): JsonResponse
     {
         $this->authorizeSettings('force_delete');
 
         $model = SiteSetting::onlyTrashed()->findOrFail($id);
-        $model->clearMediaCollection('logo');
-        $model->clearMediaCollection('favicon');
+        $this->clearAllMedia($model);
         $model->forceDelete();
 
-        return response()->json(['success' => true, 'message' => 'Site setting permanently deleted.']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Site setting permanently deleted.',
+        ]);
     }
 
     /**
-     * Inline validation helper.
+     * Validate and normalize site-setting input.
      */
     private function validateRequest(Request $request): array
     {
+        $this->normalizeMapEmbedUrl($request);
+
         return $request->validate([
             'site_name'      => ['required', 'string', 'max:190'],
             'logo_alt'       => ['nullable', 'string', 'max:255'],
@@ -272,28 +258,70 @@ class SiteSettingController extends Controller
             'whatsapp_url'   => ['nullable', 'url:http,https', 'max:2048'],
             'address'        => ['nullable', 'string'],
             'business_hours' => ['nullable', 'string', 'max:255'],
-            'map_embed_url'  => ['nullable', 'url:http,https'],
+            'map_embed_url'  => ['nullable', 'url:http,https', 'max:2048'],
             'logo'           => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'favicon'        => ['nullable', 'file', 'mimes:png,ico,jpg,jpeg,webp', 'max:1024'],
             'remove_logo'    => ['nullable', 'boolean'],
             'remove_favicon' => ['nullable', 'boolean'],
         ], [
             'contact_phone.regex' => 'ফোন নম্বরটি অবশ্যই ১১ ডিজিটের সঠিক বাংলাদেশি নম্বর হতে হবে (যেমন: 017XXXXXXXX)। +88 ব্যবহার করা যাবে না।',
+            'map_embed_url.url'   => 'Please enter a valid map URL or paste the complete Google Maps iframe embed code.',
         ]);
+    }
+
+    /**
+     * Convert a pasted Google Maps iframe into its src URL.
+     */
+    private function normalizeMapEmbedUrl(Request $request): void
+    {
+        $value = trim((string) $request->input('map_embed_url', ''));
+
+        if ($value === '') {
+            $request->merge(['map_embed_url' => null]);
+            return;
+        }
+
+        if (stripos($value, '<iframe') !== false && preg_match('/\bsrc\s*=\s*(["\'])(.*?)\1/is', $value, $matches)) {
+            $value = html_entity_decode(trim($matches[2]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        }
+
+        $request->merge(['map_embed_url' => $value]);
     }
 
     private function authorizeSettings(string $action = 'manage'): void
     {
         $user = auth('admin')->user();
-        $permission = "site_setting_{$action}";
 
         abort_unless(
-            $user?->can($permission) || 
-            $user?->can('site_setting_manage') || 
-            $user?->can('identity_settings') || 
-            $user?->can('settings'),
+            $user?->can("site_setting_{$action}")
+            || $user?->can('site_setting_manage')
+            || $user?->can('identity_settings')
+            || $user?->can('settings'),
             403
         );
+    }
+
+    private function renderAjaxModal(string $view, array $data = []): JsonResponse
+    {
+        abort_unless(request()->ajax(), 404);
+
+        return response()->json([
+            'html' => view($view, $data)->render(),
+        ]);
+    }
+
+    private function syncAllMedia(Request $request, SiteSetting $siteSetting): void
+    {
+        foreach (self::MEDIA_COLLECTIONS as $collection) {
+            $this->syncMedia($request, $siteSetting, $collection);
+        }
+    }
+
+    private function clearAllMedia(SiteSetting $siteSetting): void
+    {
+        foreach (self::MEDIA_COLLECTIONS as $collection) {
+            $siteSetting->clearMediaCollection($collection);
+        }
     }
 
     private function syncMedia(Request $request, SiteSetting $siteSetting, string $collection): void

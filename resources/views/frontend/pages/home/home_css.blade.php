@@ -343,16 +343,36 @@
     transform: scale(1.10);
 }
 
-#productShowcaseCarousel .carousel-item.active .product-showcase-card {
-    animation: cardZoomIn .95s cubic-bezier(.16, 1, .3, 1) both;
+/*
+ * Stable desktop product carousel.
+ *
+ * Bootstrap handles the horizontal slide. A second translate/scale entrance
+ * animation on every newly-active card made the content visibly jump.
+ * The card hover image zoom remains unchanged.
+ */
+#productShowcaseCarousel {
+    position: relative;
+    overflow: visible;
 }
 
-#productShowcaseCarousel .carousel-item.active .col-md-4:nth-child(2) .product-showcase-card {
-    animation-delay: .10s;
+#productShowcaseCarousel .carousel-inner {
+    height: 375px;
+    overflow: hidden;
 }
 
-#productShowcaseCarousel .carousel-item.active .col-md-4:nth-child(3) .product-showcase-card {
-    animation-delay: .20s;
+#productShowcaseCarousel .carousel-item {
+    height: 375px;
+    backface-visibility: hidden;
+    will-change: transform;
+    transition: transform .82s cubic-bezier(.22, .61, .36, 1) !important;
+}
+
+#productShowcaseCarousel .product-row {
+    height: 100%;
+}
+
+#productShowcaseCarousel .product-showcase-card {
+    animation: none !important;
 }
 
 .product-card-body {
@@ -395,18 +415,24 @@
     height: 36px;
     top: 48%;
     bottom: auto;
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 50%;
     background: var(--front-navy);
+    color: #ffffff;
     transform: translateY(-50%);
-    opacity: .85;
+    opacity: .95;
+    visibility: visible;
 }
 
 .product-control.carousel-control-prev {
-    left: -26px;
+    left: -18px;
 }
 
 .product-control.carousel-control-next {
-    right: -26px;
+    right: -18px;
 }
 
 .product-carousel-mobile {
@@ -418,7 +444,7 @@
 }
 
 #productShowcaseMobileCarousel .carousel-item {
-    transition: transform .78s cubic-bezier(.25, .46, .45, .94);
+    transition: transform .82s cubic-bezier(.22, .61, .36, 1) !important;
     backface-visibility: hidden;
     will-change: transform;
 }
