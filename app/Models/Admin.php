@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
@@ -92,7 +93,11 @@ class Admin extends Authenticatable implements HasMedia
             }
 
             if (str_starts_with($photo, 'storage/')) {
-                return asset($photo);
+                $storagePath = Str::after($photo, 'storage/');
+
+                if (Storage::disk('public')->exists($storagePath)) {
+                    return Storage::disk('public')->url($storagePath);
+                }
             }
 
             if (str_starts_with($photo, 'uploads/')) {
