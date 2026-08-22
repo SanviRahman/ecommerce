@@ -8,7 +8,6 @@ use App\Http\Controllers\Admin\FooterLinkController;
 use App\Http\Controllers\Admin\FooterSettingController;
 use App\Http\Controllers\Admin\HeaderMenuItemController;
 use App\Http\Controllers\Admin\HeaderSettingController;
-use App\Http\Controllers\Admin\HomeSectionPhotoController;
 use App\Http\Controllers\Admin\MetaPixelScriptController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
